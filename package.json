@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
-    "test-lint": "standard --fix"
+    "test": "biome check",
+    "lint:fix": "biome check --write"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,6 @@
     "mongodb": "^6.18.0"
   },
   "devDependencies": {
-    "standard": "^17.1.2"
+    "@biomejs/biome": "2.4.12"
   }
 }

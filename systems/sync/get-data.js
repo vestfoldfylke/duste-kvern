@@ -1,10 +1,10 @@
-const { logger } = require('@vtfk/logger')
-const { APPREG, GRAPH } = require('../../config')
-const { getMsalToken } = require('../../lib/get-msal-token')
+const { logger } = require("@vtfk/logger");
+const { APPREG, GRAPH } = require("../../config");
+const { getMsalToken } = require("../../lib/get-msal-token");
 // const invokePS = require('../../lib/invoke-ps-script')
-const { callGraph } = require('../azure/get-data')
+const { callGraph } = require("../azure/get-data");
 
-const getData = async (user) => {
+const getData = async (_user) => {
   // const lastIdmRun = await invokePS('Get-DUSTIDMRun.ps1') // Nej, bas01 er skrudd av
 
   const clientConfig = {
@@ -13,7 +13,7 @@ const getData = async (user) => {
     tenantName: APPREG.TENANT_NAME,
     clientSecret: APPREG.CLIENT_SECRET,
     scope: GRAPH.SCOPE
-  }
+  };
   /* INTE nu lengre
   // Hvis OU er VFYLKE/TFYLKE - hent fra ny tenant, hvis ikke hent fra vtfk
   let clientConfig
@@ -36,10 +36,10 @@ const getData = async (user) => {
   }
   */
 
-  const accessToken = await getMsalToken(clientConfig)
+  const accessToken = await getMsalToken(clientConfig);
 
-  logger('info', ['sync-get-data', `fetching lastSyncTime for tenant ${clientConfig.tenantName}`])
-  const onPremisesLastSyncDateTime = await callGraph('organization?$select=onPremisesLastSyncDateTime', accessToken)
+  logger("info", ["sync-get-data", `fetching lastSyncTime for tenant ${clientConfig.tenantName}`]);
+  const onPremisesLastSyncDateTime = await callGraph("organization?$select=onPremisesLastSyncDateTime", accessToken);
 
   return {
     // lastIdmRun,
@@ -47,7 +47,7 @@ const getData = async (user) => {
     azureSync: {
       lastEntraIDSyncTime: (onPremisesLastSyncDateTime?.value && onPremisesLastSyncDateTime.value.length > 0 && onPremisesLastSyncDateTime.value[0].onPremisesLastSyncDateTime) || null
     }
-  }
-}
+  };
+};
 
-module.exports = { getData }
+module.exports = { getData };

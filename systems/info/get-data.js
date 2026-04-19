@@ -1,7 +1,7 @@
-const getData = async (user) => {
+const getData = async (_user) => {
   return {
-    info: 'Denne blokka er bare til info den'
-  }
-}
+    info: "Denne blokka er bare til info den"
+  };
+};
 
-module.exports = { getData }
+module.exports = { getData };

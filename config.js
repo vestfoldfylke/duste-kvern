@@ -1,7 +1,7 @@
-require('dotenv').config()
+require("dotenv").config();
 
 module.exports = {
-  NODE_ENV: process.env.NODE_ENV || 'production',
+  NODE_ENV: process.env.NODE_ENV || "production",
   GET_NEW_REPORTS_INTERVAL: process.env.GET_READY_REQUESTS_INTERVAL || 1000,
   RUN_READY_REPORTS_INTERVAL: process.env.RUN_READY_REQUESTS_INTERVAL || 1000,
   COUNTY_OU: process.env.COUNTY_OU,
@@ -24,27 +24,35 @@ module.exports = {
     TENANT_NAME: process.env.APPREG_VTFK_TENANT_NAME
   },
   GRAPH: {
-    SCOPE: process.env.GRAPH_SCOPE || 'https://graph.microsoft.com/.default',
-    URL: process.env.GRAPH_URL || 'https://graph.microsoft.com'
+    SCOPE: process.env.GRAPH_SCOPE || "https://graph.microsoft.com/.default",
+    URL: process.env.GRAPH_URL || "https://graph.microsoft.com"
   },
   FINTFOLK: {
     SCOPE: process.env.FINTFOLK_SCOPE,
     URL: process.env.FINTFOLK_URL
   },
   VISMA: {
-    COMPANY_ID: process.env.VISMA_COMPANY_ID || '1',
-    CATEGORIES: process.env.VISMA_CATEGORIES || 'O,SE,TK,X,XA,XB,FW'
+    COMPANY_ID: process.env.VISMA_COMPANY_ID || "1",
+    CATEGORIES: process.env.VISMA_CATEGORIES || "O,SE,TK,X,XA,XB,FW"
   },
   SDWORX: {
-    EXCLUDED_CATEGORIES: (process.env.SDWORX_EXCLUDED_CATEGORIES && typeof process.env.SDWORX_EXCLUDED_CATEGORIES === 'string' && process.env.SDWORX_EXCLUDED_CATEGORIES.split(',')) || ['O', 'SE', 'TK', 'X', 'XA', 'XB', 'FW']
+    EXCLUDED_CATEGORIES: (process.env.SDWORX_EXCLUDED_CATEGORIES && typeof process.env.SDWORX_EXCLUDED_CATEGORIES === "string" && process.env.SDWORX_EXCLUDED_CATEGORIES.split(",")) || [
+      "O",
+      "SE",
+      "TK",
+      "X",
+      "XA",
+      "XB",
+      "FW"
+    ]
   },
   FEIDE: {
-    PRINCIPAL_NAME: process.env.FEIDE_PRINCIPAL_NAME || '@vtfk.no'
+    PRINCIPAL_NAME: process.env.FEIDE_PRINCIPAL_NAME || "@vtfk.no"
   },
   NETTSPERRE: {
     DB_NAME: process.env.NETTSPERRE_DB_NAME,
     COLLECTION_NAME: process.env.NETTSPERRE_COLLECTION_NAME
   },
-  PS1_SCRIPTS_PATH: process.env.PS1_SCRIPTS_PATH || 'D:/DUST-TEST/duste-kvern/scripts',
+  PS1_SCRIPTS_PATH: process.env.PS1_SCRIPTS_PATH || "D:/DUST-TEST/duste-kvern/scripts",
   MAX_BUFFER: process.env.MAX_BUFFER || 1024 * 10000
-}
+};
