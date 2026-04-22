@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vestfoldfylke/loglady": "^1.5.3",
     "@vestfoldfylke/msal-token": "^1.0.1",
-    "@vtfk/logger": "^6.3.4",
     "axios": "^1.12.2",
     "dotenv": "^17.4.2",
     "file-system-cache": "^2.4.7",

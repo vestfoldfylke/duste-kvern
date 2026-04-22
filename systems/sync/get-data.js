@@ -1,5 +1,5 @@
-const { logger } = require("@vtfk/logger");
 const { APPREG, GRAPH } = require("../../config");
+const { logger } = require("@vestfoldfylke/loglady");
 const { getMsalToken } = require("../../lib/get-msal-token");
 // const invokePS = require('../../lib/invoke-ps-script')
 const { callGraph } = require("../azure/get-data");
@@ -38,7 +38,7 @@ const getData = async (_user) => {
 
   const accessToken = await getMsalToken(clientConfig);
 
-  logger("info", ["sync-get-data", `fetching lastSyncTime for tenant ${clientConfig.tenantName}`]);
+  logger.info("sync-get-data - fetching lastSyncTime for tenant {TenantName}", clientConfig.tenantName);
   const onPremisesLastSyncDateTime = await callGraph("organization?$select=onPremisesLastSyncDateTime", accessToken);
 
   return {

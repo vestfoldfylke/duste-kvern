@@ -1,28 +1,21 @@
 (async () => {
-  const { Worker } = require("node:worker_threads");
-  const { logger, logConfig } = require("@vtfk/logger");
   const { MONGODB, GET_NEW_REPORTS_INTERVAL } = require("./config");
+  const { Worker } = require("node:worker_threads");
+  const { logger } = require("@vestfoldfylke/loglady");
   const { getMongoClient } = require("./lib/mongo-client");
-  const { createLocalLogger } = require("./lib/local-logger");
 
   const workerFile = "./lib/dust-report-worker.js";
-
-  // Set up logging
-  logConfig({
-    teams: {
-      onlyInProd: false
-    },
-    localLogger: createLocalLogger("duste-kvern")
-  });
 
   let readyForNewReports = true;
 
   const getAndRunNewReports = async () => {
     if (!readyForNewReports) {
-      console.log("not ready for run - skipping");
+      logger.warn("indexThreader - Not ready for run - skipping");
       return null;
     }
+
     readyForNewReports = false;
+
     try {
       // Get ready reports from mongodb
       const client = await getMongoClient();
@@ -36,28 +29,30 @@
       await collection.updateMany({ _id: { $in: newReports.map((doc) => doc._id) } }, { $set: updateProps });
       readyForNewReports = true;
 
-      if (newReports.length > 0) logger("info", ["getAndRunNewReports", `Got ${newReports.length} new reports`]);
+      if (newReports.length > 0) {
+        logger.info("indexThreader - getAndRunNewReports - Got {NewReportCount} new reports", newReports.length);
+      }
 
       newReports.forEach((report) => {
         report._id = report._id.toString(); // workers don't handle mongodb type in workerData-transfer
         report = { ...report, ...updateProps };
         const worker = new Worker(workerFile, { workerData: report });
-        logger("info", [`starting worker ${worker.threadId}`]);
+        logger.info("indexThreader - Starting worker with Thread Id {WorkerThreadId}", worker.threadId);
         worker.on("message", (msg) => {
-          logger("info", ["Beskjed fra worker", worker.threadId, msg]);
+          logger.info("indexThreader - Message from worker with Thread Id {WorkerThreadId}, Message: {Message}", worker.threadId, msg);
         });
         worker.on("error", (err) => {
-          logger("warn", ["Error på worker", worker.threadId, err.stack || err.message]);
+          logger.errorException(err, "indexThreader - Error on worker with Thread Id {WorkerThreadId}", worker.threadId);
         });
         worker.on("exit", (code) => {
-          logger("info", ["Worker er ferdig", worker.threadId, "exit code", code]);
+          logger.info("indexThreader - Worker finished on Thread Id {WorkerThreadId} with exit code {Code}", worker.threadId, code);
         });
-        logger("info", ["worker started"]);
+        logger.info("indexThreader - Worker started");
       });
 
       return newReports.length;
     } catch (error) {
-      logger("warn", ["Failed when getting new reports", error.stack || error.toString()]);
+      logger.errorException(error, "indexThreader - Failed when getting new reports");
       readyForNewReports = true;
       return null;
     }

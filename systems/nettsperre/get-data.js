@@ -1,5 +1,4 @@
 // const axios = require('axios')
-// const { logger } = require('@vtfk/logger')
 
 const { NETTSPERRE } = require("../../config");
 const { getMongoClient } = require("../../lib/mongo-client");

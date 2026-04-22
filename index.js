@@ -1,26 +1,19 @@
 (async () => {
   const { MONGODB, GET_NEW_REPORTS_INTERVAL } = require("./config");
   const { getMongoClient } = require("./lib/mongo-client");
-  const { logger, logConfig } = require("@vtfk/logger");
+  const { logger } = require("@vestfoldfylke/loglady");
   const { handleDustReport } = require("./lib/handle-dust-report");
-  const { createLocalLogger } = require("./lib/local-logger");
-
-  // Set up logging
-  logConfig({
-    teams: {
-      onlyInProd: false
-    },
-    localLogger: createLocalLogger("duste-kvern")
-  });
 
   let readyForNewReports = true;
 
   const getAndRunNewReports = async () => {
     if (!readyForNewReports) {
-      console.log("not ready for run - skipping");
+      logger.warn("index - Not ready for run - skipping");
       return null;
     }
+
     readyForNewReports = false;
+
     try {
       // Get ready reports from mongodb
       const client = await getMongoClient();
@@ -34,7 +27,9 @@
       await collection.updateMany({ _id: { $in: newReports.map((doc) => doc._id) } }, { $set: updateProps });
       readyForNewReports = true;
 
-      if (newReports.length > 0) logger("info", ["getAndRunNewReports", `Got ${newReports.length} new reports`]);
+      if (newReports.length > 0) {
+        logger.info("index - getAndRunNewReports - Got {NewReportCount} new reports", newReports.length);
+      }
 
       newReports.forEach((report) => {
         report = { ...report, ...updateProps };
@@ -43,7 +38,7 @@
 
       return newReports.length;
     } catch (error) {
-      logger("warn", ["Failed when getting new reports", error.stack || error.toString()]);
+      logger.errorException(error, "index - getAndRunNewReports - Failed when getting new reports");
       readyForNewReports = true;
       return null;
     }

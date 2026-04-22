@@ -1,8 +1,8 @@
-const { getMsalToken } = require("../../lib/get-msal-token");
 const { APPREG, GRAPH } = require("../../config");
+const { logger } = require("@vestfoldfylke/loglady");
+const { getMsalToken } = require("../../lib/get-msal-token");
 const axios = require("axios");
 const { entraIdDate } = require("../../lib/helpers/date-time-output");
-const { logger } = require("@vtfk/logger");
 
 const excludeSignInErrors = [70043];
 
@@ -129,7 +129,7 @@ const getData = async (user) => {
     ]
   };
 
-  logger("info", ["azure-get-data", "fetching data from ms graph"]);
+  logger.info("azure-get-data - fetching data from ms graph");
   const { responses } = await batchGraph(batchRequest, accessToken);
   const failedRequest = responses.find((response) => response.status !== 200 && response.status !== 429);
   if (failedRequest) {

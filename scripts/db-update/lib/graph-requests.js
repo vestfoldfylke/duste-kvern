@@ -3,7 +3,7 @@ require("dotenv").config({ path: join(__dirname, "../../../.env") }); // User th
 
 const { getMsalToken } = require("../../../lib/get-msal-token");
 const axios = require("axios");
-const { logger } = require("@vtfk/logger");
+const { logger } = require("@vestfoldfylke/loglady");
 
 /**
  * @typedef EntraUser
@@ -63,7 +63,7 @@ const getAllEmployees = async () => {
   let page = 0;
   while (!finished) {
     const { data } = await axios.get(url, { headers: { Authorization: `Bearer ${accessToken}`, ConsistencyLevel: "eventual" } });
-    logger("info", ["getAllEmployees", `Got ${data.value.length} elements from page ${page}, will check for more`]);
+    logger.info("getAllEmployees - Got {ElementCount} elements from page {Page}, will check for more", data.value.length, page);
     finished = data["@odata.nextLink"] === undefined;
     url = data["@odata.nextLink"];
     result.value = result.value.concat(data.value);
@@ -88,7 +88,7 @@ const getAllStudents = async () => {
   let page = 0;
   while (!finished) {
     const { data } = await axios.get(url, { headers: { Authorization: `Bearer ${accessToken}`, ConsistencyLevel: "eventual" } });
-    logger("info", ["getAllStudents", `Got ${data.value.length} elements from page ${page}, will check for more`]);
+    logger.info("getAllStudents - Got {ElementCount} elements from page {Page}, will check for more", data.value.length, page);
     finished = data["@odata.nextLink"] === undefined;
     url = data["@odata.nextLink"];
     result.value = result.value.concat(data.value);
@@ -113,7 +113,7 @@ const getTeacherGroupMembers = async () => {
   let page = 0;
   while (!finished) {
     const { data } = await axios.get(url, { headers: { Authorization: `Bearer ${accessToken}`, ConsistencyLevel: "eventual" } });
-    logger("info", ["getTeacherGroupMembers", `Got ${data.value.length} elements from page ${page}, will check for more`]);
+    logger.info("getTeacherGroupMembers - Got {ElementCount} elements from page {Page}, will check for more", data.value.length, page);
     finished = data["@odata.nextLink"] === undefined;
     url = data["@odata.nextLink"];
     result.value = result.value.concat(data.value);
@@ -138,7 +138,7 @@ const getAllDeletedStudents = async () => {
   let page = 0;
   while (!finished) {
     const { data } = await axios.get(url, { headers: { Authorization: `Bearer ${accessToken}`, ConsistencyLevel: "eventual" } });
-    logger("info", ["getAllDeletedUsers", `Got ${data.value.length} elements from page ${page}, will check for more`]);
+    logger.info("getAllDeletedUsers - Got {ElementCount} elements from page {Page}, will check for more", data.value.length, page);
     finished = data["@odata.nextLink"] === undefined;
     url = data["@odata.nextLink"];
     result.value = result.value.concat(data.value);

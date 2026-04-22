@@ -1,29 +1,22 @@
 (async () => {
   const { MONGODB, GET_NEW_REPORTS_INTERVAL, RUN_READY_REPORTS_INTERVAL } = require("./config");
   const { getMongoClient } = require("./lib/mongo-client");
-  const { logger, logConfig } = require("@vtfk/logger");
+  const { logger } = require("@vestfoldfylke/loglady");
   const Cache = require("file-system-cache").default;
   const { handleDustReport } = require("./lib/handle-dust-report-file-cache");
-  const { createLocalLogger } = require("./lib/local-logger");
 
   const fileCacheQueue = Cache({ basePath: "./.queue-file-cache", hash: "sha1" });
-
-  // Set up logging
-  logConfig({
-    teams: {
-      onlyInProd: false
-    },
-    localLogger: createLocalLogger("duste-kvern")
-  });
 
   let readyForNewReports = true;
 
   const getNewReports = async () => {
     if (!readyForNewReports) {
-      console.log("not ready for run - skipping");
+      logger.warn("indexFileCache - Not ready for run - skipping");
       return null;
     }
+
     readyForNewReports = false;
+
     try {
       // Get ready reports from mongodb
       const client = await getMongoClient();
@@ -43,10 +36,12 @@
       await collection.updateMany({ _id: { $in: newReports.map((doc) => doc._id) } }, { $set: updateProps });
       readyForNewReports = true;
 
-      if (newReports.length > 0) logger("info", ["getNewReports", `Got ${newReports.length} new reports`]);
+      if (newReports.length > 0) {
+        logger.info("indexFileCache - getNewReports - Got {NewReportCount} new reports", newReports.length);
+      }
       return newReports.length;
     } catch (error) {
-      logger("warn", ["Failed when getting new reports", error.stack || error.toString()]);
+      logger.errorException(error, "indexFileCache - getNewReports - Failed when getting new reports");
       readyForNewReports = true;
       return null;
     }
@@ -63,7 +58,9 @@
           return { key: report._id, value: { ...report, running: true } };
         })
       );
-      if (readyForRun.length > 0) logger("info", ["runReadyReports", `Got ${readyForRun.length} new reports`]);
+      if (readyForRun.length > 0) {
+        logger.info("indexFileCache - runReadyReports - Got {ReadyForRunCount} new reports", readyForRun.length);
+      }
 
       /* Nope - we don't need the results, we only need to fire them
       // Set up promises
@@ -80,7 +77,7 @@
         handleDustReport(report);
       });
     } catch (error) {
-      logger("warn", ["Failed when getting ready for run from fileCacheQueue", error.stack || error.toString()]);
+      logger.errorException(error, "indexFileCache - runReadyReports - Failed when getting ready for run from fileCacheQueue");
     }
   };
 
