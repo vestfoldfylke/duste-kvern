@@ -1,5 +1,3 @@
-// const axios = require('axios')
-
 const { NETTSPERRE } = require("../../config");
 const { getMongoClient } = require("../../lib/mongo-client");
 

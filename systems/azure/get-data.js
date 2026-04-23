@@ -1,19 +1,44 @@
 const { APPREG, GRAPH } = require("../../config");
 const { logger } = require("@vestfoldfylke/loglady");
 const { getMsalToken } = require("../../lib/get-msal-token");
-const axios = require("axios");
 const { entraIdDate } = require("../../lib/helpers/date-time-output");
 
 const excludeSignInErrors = [70043];
 
 const callGraph = async (resource, accessToken) => {
-  const { data } = await axios.get(`${GRAPH.URL}/v1.0/${resource}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-  return data;
+  const response = await fetch(`${GRAPH.URL}/v1.0/${resource}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    logger.error("Failed to fetch {Resource} graph data. Status: {Status}, StatusText: {StatusText}. Error: {Error}", resource, response.status, response.statusText, error);
+    throw new Error(`Failed to fetch ${resource} graph data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
+  }
+
+  return response.json();
 };
 
 const batchGraph = async (batchRequest, accessToken) => {
-  const { data } = await axios.post(`${GRAPH.URL}/v1.0/$batch`, batchRequest, { headers: { Authorization: `Bearer ${accessToken}` } });
-  return data;
+  const response = await fetch(`${GRAPH.URL}/v1.0/$batch`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(batchRequest)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    logger.error("Failed to POST graph batch request. Status: {Status}, StatusText: {StatusText}. Error: {Error}", response.status, response.statusText, error);
+    throw new Error(`Failed to POST graph batch request. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
+  }
+
+  return response.json();
 };
 
 const getSchoolYear = (yearsBack = 0) => {
