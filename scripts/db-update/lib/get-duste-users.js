@@ -4,10 +4,14 @@ require("dotenv").config({ path: join(__dirname, "../../../.env") }); // User th
 const { logger } = require("@vestfoldfylke/loglady");
 
 const TENANT_NAME = process.env.APPREG_TENANT_NAME;
-if (!TENANT_NAME) throw new Error("Mangler tenantName i .env på rot");
+if (!TENANT_NAME) {
+  throw new Error("Mangler tenantName i .env på rot");
+}
 
 const EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE = process.env.GRAPH_EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE;
-if (!EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE) throw new Error("Har du glemt å legge inn GRAPH_EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE i .env på rot mon tro?");
+if (!EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE) {
+  throw new Error("Har du glemt å legge inn GRAPH_EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE i .env på rot mon tro?");
+}
 
 const getDusteUsers = async () => {
   const { getAllEmployees, getTeacherGroupMembers, getAllStudents, getAllDeletedStudents } = require("./graph-requests");
@@ -41,11 +45,16 @@ const getDusteUsers = async () => {
     employee.isTeacher = teacherGroupMembers.value.some((member) => member.userPrincipalName === employee.userPrincipalName);
     employee.feidenavn = employee.isTeacher && employee.onPremisesSamAccountName ? `${employee.onPremisesSamAccountName}@${TENANT_NAME}.no` : null;
     employee.samAccountName = employee.onPremisesSamAccountName;
+
     delete employee.onPremisesSamAccountName;
+
     employee.employeeNumber = employee[EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE] || null;
+
     delete employee[EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE];
+
     allUsers.push(employee);
   }
+
   logger.info("Repacking students");
   for (const student of students.value) {
     // If jobTitle lik lærling - is lærling
@@ -66,6 +75,7 @@ const getDusteUsers = async () => {
       allUsers.push(student);
     }
   }
+
   logger.info("Repacking deleted students");
   for (const student of deletedStudents.value) {
     // All deleted students are of type "slettaElev"
@@ -78,6 +88,7 @@ const getDusteUsers = async () => {
     student.feidenavn = `${upnPrefix}@${TENANT_NAME}.no`;
     allUsers.push(student);
   }
+
   logger.info("Finished repacking users - returning all {UserCount} users", allUsers.length);
   return allUsers;
 };

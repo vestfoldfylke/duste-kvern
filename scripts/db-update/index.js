@@ -40,8 +40,14 @@
   if (updateType === "users") {
     const now = new Date().toISOString();
     data = data.map((user) => {
-      if (!user.displayName) return user;
-      if (!user.surname) return user;
+      if (!user.displayName) {
+        return user;
+      }
+
+      if (!user.surname) {
+        return user;
+      }
+
       return {
         ...user,
         displayNameLowerCase: user.displayName.toLowerCase(),
@@ -49,6 +55,7 @@
         updatedAt: now
       };
     });
+
     const usersPath = join(__dirname, "./data/users.json");
     writeFileSync(usersPath, JSON.stringify(data, null, 2));
   }

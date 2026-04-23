@@ -11,16 +11,20 @@ const getData = async (user) => {
     clientSecret: APPREG.CLIENT_SECRET,
     scope: FINTFOLK.SCOPE
   };
+
   const accessToken = await getMsalToken(clientConfig);
+
   try {
     const feidenavn = user.feidenavn || `${user.samAccountName}${FEIDE.PRINCIPAL_NAME}`;
     const fintTeacher = await callFintFolk(`teacher/feidenavn/${feidenavn}?skipCache=true`, accessToken); // Kan legge til skipCache=true for å alltid hente fra FINT dersom det trengs (gjelder også de andre fint-kallene)
     delete fintTeacher.bostedsadresse; // Just in case
+
     return fintTeacher;
   } catch (error) {
     if (error.response?.status === 404) {
       return null;
     }
+
     throw error;
   }
 };
