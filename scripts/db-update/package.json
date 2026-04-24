@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:sds": "node index.js sds",
-    "start:users": "node index.js users",
-    "start:ot": "node index.js ot",
-    "start:laerling": "node index.js laerling"
+    "start:sds": "node --env-file=../../.env index.js sds",
+    "start:users": "node --env-file=../../.env index.js users",
+    "start:ot": "node --env-file=../../.env index.js ot",
+    "start:laerling": "node --env-file=../../.env index.js laerling"
   },
   "keywords": [],
   "author": {
@@ -18,7 +18,6 @@
   "license": "ISC",
   "dependencies": {
     "@vestfoldfylke/loglady": "^1.5.3",
-    "dotenv": "^17.4.2",
     "mongodb": "^7.1.1"
   }
 }

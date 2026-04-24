@@ -1,7 +1,5 @@
-const config = require("../config");
 const { logger } = require("@vestfoldfylke/loglady");
 const MongoClient = require("mongodb").MongoClient;
-const { MONGODB_CONNECTION } = config;
 
 let client = null;
 
@@ -10,13 +8,13 @@ let client = null;
  * @returns {MongoClient}
  */
 module.exports = () => {
-  if (!MONGODB_CONNECTION) {
-    logger.error("mongo - missing MONGODB_CONNECTION");
-    throw new Error("Missing env MONGODB_CONNECTION");
+  if (!process.env.MONGODB_CONNECTION_STRING) {
+    logger.error("mongo - missing MONGODB_CONNECTION_STRING");
+    throw new Error("Missing env MONGODB_CONNECTION_STRING");
   }
 
   if (client === null) {
-    client = new MongoClient(MONGODB_CONNECTION);
+    client = new MongoClient(process.env.MONGODB_CONNECTION_STRING);
     logger.info("mongo - new client init");
     return client;
   }

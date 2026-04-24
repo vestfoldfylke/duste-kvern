@@ -1,6 +1,3 @@
-const { join } = require("node:path");
-require("dotenv").config({ path: join(__dirname, "../../../.env") }); // User the same env as duste-kvern testene (appreg there has what we need)
-
 const { logger } = require("@vestfoldfylke/loglady");
 const { getMsalToken } = require("../../../lib/get-msal-token");
 

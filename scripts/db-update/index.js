@@ -1,17 +1,7 @@
 (async () => {
-  const { MONGODB_USERS_NAME, MONGODB_USERS_COLLECTION } = require("./config");
-  const { logger } = require("@vestfoldfylke/loglady");
-
-  const args = process.argv.slice(2);
-  if (args.length === 0) {
-    logger.warn("lib - update-database - Tell me what update to do!\n- users\n- sds");
-    process.exit(1);
-  }
-
-  const updateType = args[0].toLowerCase();
-
-  const { join } = require("node:path");
   const { writeFileSync } = require("node:fs");
+  const { join } = require("node:path");
+  const { logger } = require("@vestfoldfylke/loglady");
   const { getDusteUsers } = require("./lib/get-duste-users");
   const mongo = require("./lib/mongo");
 
@@ -20,6 +10,14 @@
       setTimeout(resolve, ms);
     });
   };
+
+  const args = process.argv.slice(2);
+  if (args.length === 0) {
+    logger.warn("lib - update-database - Tell me what update to do!\n- users\n- sds");
+    process.exit(1);
+  }
+
+  const updateType = args[0].toLowerCase();
 
   let data;
   if (updateType === "users") {
@@ -35,7 +33,7 @@
   }
 
   const mongoClient = mongo();
-  const db = mongoClient.db(MONGODB_USERS_NAME).collection(MONGODB_USERS_COLLECTION);
+  const db = mongoClient.db(process.env.MONGODB_DB_NAME).collection(process.env.MONGODB_USERS_COLLECTION);
 
   if (updateType === "users") {
     const now = new Date().toISOString();

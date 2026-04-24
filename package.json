@@ -13,7 +13,6 @@
   "dependencies": {
     "@vestfoldfylke/loglady": "^1.5.3",
     "@vestfoldfylke/msal-token": "^1.0.1",
-    "dotenv": "^17.4.2",
     "file-system-cache": "^2.4.7",
     "mongodb": "^7.1.1"
   },

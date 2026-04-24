@@ -12,12 +12,9 @@ Node scripts used by DUST
 
 ### .env
 
-Create a `.env` file in node root folder with this content:
-```bash
-MONGODB_CONNECTION=mongodb+srv://<username>:<password>@<server>?retryWrites=true&w=majority
-MONGODB_USERS_COLLECTION=collectionname
-MONGODB_USERS_NAME=databasename
-```
+These scripts rely on `.env` environment file in the root folder (duste-kvern)
+
+All scripts must be started with the `--env-file` argument like this: `node --env-file=../../../.env <script-name>.js`
 
 ## Scripts
 
@@ -29,5 +26,5 @@ MONGODB_USERS_NAME=databasename
 
 Remove all users from db and update db with users from `.\db-update\data\users.json`
 ```bash
-node .\index.js users
+node --env-file=../../../.env .\index.js users
 ```

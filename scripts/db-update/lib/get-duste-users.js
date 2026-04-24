@@ -1,6 +1,3 @@
-const { join } = require("node:path");
-require("dotenv").config({ path: join(__dirname, "../../../.env") }); // User the same env as duste-kvern testene
-
 const { logger } = require("@vestfoldfylke/loglady");
 
 const TENANT_NAME = process.env.APPREG_TENANT_NAME;
