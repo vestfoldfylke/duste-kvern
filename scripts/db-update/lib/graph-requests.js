@@ -12,7 +12,7 @@ const getGraphData = async (url, accessToken, type) => {
 
   if (!response.ok) {
     const error = await response.json();
-    logger.error("{Type} - Failed to fetch graph data. Status: {Status}, StatusText: {StatusText}. Error: {Error}", type, response.status, response.statusText, error);
+    logger.errorException(error, "{Type} - Failed to fetch graph data. Status: {Status}, StatusText: {StatusText}", type, response.status, response.statusText);
     throw new Error(`${type} - Failed to fetch graph data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
   }
 

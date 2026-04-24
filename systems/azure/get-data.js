@@ -15,7 +15,7 @@ const callGraph = async (resource, accessToken) => {
 
   if (!response.ok) {
     const error = await response.json();
-    logger.error("Failed to fetch {Resource} graph data. Status: {Status}, StatusText: {StatusText}. Error: {Error}", resource, response.status, response.statusText, error);
+    logger.errorException(error, "Failed to fetch {Resource} graph data. Status: {Status}, StatusText: {StatusText}", resource, response.status, response.statusText);
     throw new Error(`Failed to fetch ${resource} graph data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
   }
 
@@ -34,7 +34,7 @@ const batchGraph = async (batchRequest, accessToken) => {
 
   if (!response.ok) {
     const error = await response.json();
-    logger.error("Failed to POST graph batch request. Status: {Status}, StatusText: {StatusText}. Error: {Error}", response.status, response.statusText, error);
+    logger.errorException(error, "Failed to POST graph batch request. Status: {Status}, StatusText: {StatusText}", response.status, response.statusText);
     throw new Error(`Failed to POST graph batch request. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
   }
 

@@ -13,7 +13,7 @@ const callFintFolk = async (resource, accessToken) => {
 
   if (!response.ok) {
     const error = await response.json();
-    logger.error("Failed to fetch {Resource} FINT data. Status: {Status}, StatusText: {StatusText}. Error: {Error}", resource, response.status, response.statusText, error);
+    logger.errorException(error, "Failed to fetch {Resource} FINT data. Status: {Status}, StatusText: {StatusText}", resource, response.status, response.statusText);
     throw new Error(`Failed to fetch ${resource} FINT data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
   }
 
