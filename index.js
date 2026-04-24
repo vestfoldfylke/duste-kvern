@@ -41,6 +41,8 @@
       logger.errorException(error, "index - getAndRunNewReports - Failed when getting new reports");
       readyForNewReports = true;
       return null;
+    } finally {
+      await logger.flush();
     }
   };
 

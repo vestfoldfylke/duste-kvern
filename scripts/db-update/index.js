@@ -5,12 +5,6 @@
   const { getDusteUsers } = require("./lib/get-duste-users");
   const mongo = require("./lib/mongo");
 
-  const sleep = (ms) => {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  };
-
   const args = process.argv.slice(2);
   if (args.length === 0) {
     logger.warn("lib - update-database - Tell me what update to do!\n- users\n- sds");
@@ -25,7 +19,8 @@
       data = await getDusteUsers();
     } catch (error) {
       logger.errorException(error, "Error when fetching duste-users from graph");
-      await sleep(1000);
+
+      await logger.flush();
       process.exit(1);
     }
   } else {
@@ -64,7 +59,8 @@
     await db.drop();
   } catch (error) {
     logger.errorException(error, "lib - update-database - UpdateType: {UpdateType} - unable to clear collection", updateType);
-    await sleep(1000);
+
+    await logger.flush();
     process.exit(1);
   }
 
@@ -74,7 +70,8 @@
     logger.info("lib - update-database - UpdateType: {UpdateType} - insert data - InsertedCount: {InsertedCount}", updateType, result.insertedCount);
   } catch (error) {
     logger.errorException(error, "lib - update-database - UpdateType: {UpdateType} - update data - failed to insert data", updateType);
-    await sleep(1000);
+
+    await logger.flush();
     process.exit(2);
   }
 
@@ -89,6 +86,7 @@
 
   logger.info("lib - update-database - UpdateType: {UpdateType} - finished", updateType);
   await mongoClient.close();
-  await sleep(1000);
+
+  await logger.flush();
   process.exit(0);
 })();

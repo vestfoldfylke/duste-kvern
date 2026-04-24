@@ -44,6 +44,8 @@
       logger.errorException(error, "indexFileCache - getNewReports - Failed when getting new reports");
       readyForNewReports = true;
       return null;
+    } finally {
+      await logger.flush();
     }
   };
 
@@ -78,6 +80,8 @@
       });
     } catch (error) {
       logger.errorException(error, "indexFileCache - runReadyReports - Failed when getting ready for run from fileCacheQueue");
+    } finally {
+      await logger.flush();
     }
   };
 
