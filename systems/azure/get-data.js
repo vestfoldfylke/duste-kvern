@@ -1,6 +1,6 @@
-const { APPREG, GRAPH } = require("../../config");
+const { GRAPH } = require("../../config");
 const { logger } = require("@vestfoldfylke/loglady");
-const { getMsalToken } = require("../../lib/get-msal-token");
+const { getEntraToken } = require("../../lib/get-entra-token");
 const { entraIdDate } = require("../../lib/helpers/date-time-output");
 
 const excludeSignInErrors = [70043];
@@ -54,13 +54,6 @@ const getSchoolYear = (yearsBack = 0) => {
 };
 
 const getData = async (user) => {
-  const clientConfig = {
-    clientId: APPREG.CLIENT_ID,
-    tenantId: APPREG.TENANT_ID,
-    tenantName: APPREG.TENANT_NAME,
-    clientSecret: APPREG.CLIENT_SECRET,
-    scope: GRAPH.SCOPE
-  };
   /*
   // Hvis OU er VFYLKE/TFYLKE - hent fra ny tenant, hvis ikke hent fra vtfk. Inte nu lengre - alle fra VFYLKE/TFYLKE
 
@@ -82,7 +75,7 @@ const getData = async (user) => {
     }
   }
     */
-  const accessToken = await getMsalToken(clientConfig);
+  const accessToken = await getEntraToken(GRAPH.SCOPE);
 
   const userProperties = [
     "id",

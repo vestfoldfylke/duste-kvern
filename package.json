@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/identity": "^4.13.1",
     "@vestfoldfylke/loglady": "^1.5.3",
-    "@vestfoldfylke/msal-token": "^1.0.1",
     "file-system-cache": "^2.4.7",
     "mongodb": "^7.1.1"
   },

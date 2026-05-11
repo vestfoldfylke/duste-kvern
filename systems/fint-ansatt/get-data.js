@@ -1,7 +1,7 @@
-const { APPREG, FINTFOLK } = require("../../config");
+const { FINTFOLK } = require("../../config");
 const { logger } = require("@vestfoldfylke/loglady");
 const { CustomError } = require("../../lib/CustomError");
-const { getMsalToken } = require("../../lib/get-msal-token");
+const { getEntraToken } = require("../../lib/get-entra-token");
 
 const callFintFolk = async (resource, accessToken) => {
   const response = await fetch(`${FINTFOLK.URL}/${resource}`, {
@@ -22,14 +22,7 @@ const callFintFolk = async (resource, accessToken) => {
 
 const getData = async (user) => {
   // Hent et token
-  const clientConfig = {
-    clientId: APPREG.CLIENT_ID,
-    tenantId: APPREG.TENANT_ID,
-    tenantName: APPREG.TENANT_NAME,
-    clientSecret: APPREG.CLIENT_SECRET,
-    scope: FINTFOLK.SCOPE
-  };
-  const accessToken = await getMsalToken(clientConfig);
+  const accessToken = await getEntraToken(FINTFOLK.SCOPE);
 
   try {
     const fintEmployee = await callFintFolk(`employee/ansattnummer/${user.onPremisesExtensionAttributes.extensionAttribute9}?skipCache=true`, accessToken); // Kan legge til skipCache=true for å alltid hente fra FINT dersom det trengs (gjelder også de andre fint-kallene)

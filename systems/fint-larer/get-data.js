@@ -1,18 +1,10 @@
-const { getMsalToken } = require("../../lib/get-msal-token");
-const { APPREG, FINTFOLK, FEIDE } = require("../../config");
+const { getEntraToken } = require("../../lib/get-entra-token");
+const { FINTFOLK, FEIDE } = require("../../config");
 const { callFintFolk } = require("../fint-ansatt/get-data");
 
 const getData = async (user) => {
   // Hent et token
-  const clientConfig = {
-    clientId: APPREG.CLIENT_ID,
-    tenantId: APPREG.TENANT_ID,
-    tenantName: APPREG.TENANT_NAME,
-    clientSecret: APPREG.CLIENT_SECRET,
-    scope: FINTFOLK.SCOPE
-  };
-
-  const accessToken = await getMsalToken(clientConfig);
+  const accessToken = await getEntraToken(FINTFOLK.SCOPE);
 
   try {
     const feidenavn = user.feidenavn || `${user.samAccountName}${FEIDE.PRINCIPAL_NAME}`;

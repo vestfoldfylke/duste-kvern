@@ -1,5 +1,5 @@
 const { logger } = require("@vestfoldfylke/loglady");
-const { getMsalToken } = require("../../../lib/get-msal-token");
+const { getEntraToken } = require("../../../lib/get-entra-token");
 
 const getGraphData = async (url, accessToken, type) => {
   const response = await fetch(url, {
@@ -20,7 +20,7 @@ const getGraphData = async (url, accessToken, type) => {
 };
 
 const getGraphResult = async (url, type) => {
-  const accessToken = await getMsalToken(tokenConfig);
+  const accessToken = await getEntraToken(GRAPH.SCOPE);
   let finished = false;
 
   const result = {
@@ -72,14 +72,6 @@ const GRAPH = {
 
 if (!GRAPH.TEACHER_GROUP_ID) throw new Error("Har du glemt å legge inn GRAPH_TEACHER_GROUP_ID i .env på rot mon tro?");
 if (!GRAPH.EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE) throw new Error("Har du glemt å legge inn GRAPH_EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE i .env på rot mon tro?");
-
-const tokenConfig = {
-  clientId: process.env.APPREG_CLIENT_ID,
-  clientSecret: process.env.APPREG_CLIENT_SECRET,
-  tenantId: process.env.APPREG_TENANT_ID,
-  tenantName: process.env.APPREG_TENANT_NAME,
-  scope: GRAPH.SCOPE
-};
 
 /**
  * @typedef EntraUsers
