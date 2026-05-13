@@ -1,43 +1,59 @@
-const { getMsalToken } = require('../../lib/get-msal-token')
-const { APPREG, GRAPH } = require('../../config')
-const axios = require('axios')
-const { entraIdDate } = require('../../lib/helpers/date-time-output')
-const { logger } = require('@vtfk/logger')
+const { GRAPH } = require("../../config");
+const { logger } = require("@vestfoldfylke/loglady");
+const { getEntraToken } = require("../../lib/get-entra-token");
+const { entraIdDate } = require("../../lib/helpers/date-time-output");
 
-const excludeSignInErrors = [
-  70043
-]
+const excludeSignInErrors = [70043];
 
 const callGraph = async (resource, accessToken) => {
-  const { data } = await axios.get(`${GRAPH.URL}/v1.0/${resource}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-  return data
-}
+  const response = await fetch(`${GRAPH.URL}/v1.0/${resource}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    logger.errorException(error, "Failed to fetch {Resource} graph data. Status: {Status}, StatusText: {StatusText}", resource, response.status, response.statusText);
+    throw new Error(`Failed to fetch ${resource} graph data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
+  }
+
+  return response.json();
+};
 
 const batchGraph = async (batchRequest, accessToken) => {
-  const { data } = await axios.post(`${GRAPH.URL}/v1.0/$batch`, batchRequest, { headers: { Authorization: `Bearer ${accessToken}` } })
-  return data
-}
+  const response = await fetch(`${GRAPH.URL}/v1.0/$batch`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(batchRequest)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    logger.errorException(error, "Failed to POST graph batch request. Status: {Status}, StatusText: {StatusText}", response.status, response.statusText);
+    throw new Error(`Failed to POST graph batch request. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${error}`);
+  }
+
+  return response.json();
+};
 
 const getSchoolYear = (yearsBack = 0) => {
-  const today = new Date()
-  const currentMonth = today.getMonth() + 1
-  const currentYear = Number.parseInt(today.getFullYear().toString().slice(-2)) - yearsBack
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  const currentYear = Number.parseInt(today.getFullYear().toString().slice(-2), 10) - yearsBack;
 
   if (currentMonth >= 8 && currentMonth <= 12) {
-    return `${currentYear}${currentYear + 1}`
+    return `${currentYear}${currentYear + 1}`;
   }
 
-  return `${currentYear - 1}${currentYear}`
-}
+  return `${currentYear - 1}${currentYear}`;
+};
 
 const getData = async (user) => {
-  const clientConfig = {
-    clientId: APPREG.CLIENT_ID,
-    tenantId: APPREG.TENANT_ID,
-    tenantName: APPREG.TENANT_NAME,
-    clientSecret: APPREG.CLIENT_SECRET,
-    scope: GRAPH.SCOPE
-  }
   /*
   // Hvis OU er VFYLKE/TFYLKE - hent fra ny tenant, hvis ikke hent fra vtfk. Inte nu lengre - alle fra VFYLKE/TFYLKE
 
@@ -59,120 +75,126 @@ const getData = async (user) => {
     }
   }
     */
-  const accessToken = await getMsalToken(clientConfig)
+  const accessToken = await getEntraToken(GRAPH.SCOPE);
 
   const userProperties = [
-    'id',
-    'accountEnabled',
-    'assignedLicenses',
-    'businessPhones',
-    'companyName',
-    'createdDateTime',
-    'deletedDateTime',
-    'department',
-    'displayName',
-    'givenName',
-    'jobTitle',
-    'lastPasswordChangeDateTime',
-    'mail',
-    'mobilePhone',
-    'onPremisesDistinguishedName',
-    'onPremisesExtensionAttributes',
-    'onPremisesLastSyncDateTime',
-    'onPremisesProvisioningErrors',
-    'onPremisesSamAccountName',
-    'onPremisesSyncEnabled',
-    'proxyAddresses',
-    'signInSessionsValidFromDateTime',
-    'surname',
-    'userPrincipalName'
-  ].join(',')
+    "id",
+    "accountEnabled",
+    "assignedLicenses",
+    "businessPhones",
+    "companyName",
+    "createdDateTime",
+    "deletedDateTime",
+    "department",
+    "displayName",
+    "givenName",
+    "jobTitle",
+    "lastPasswordChangeDateTime",
+    "mail",
+    "mobilePhone",
+    "onPremisesDistinguishedName",
+    "onPremisesExtensionAttributes",
+    "onPremisesLastSyncDateTime",
+    "onPremisesProvisioningErrors",
+    "onPremisesSamAccountName",
+    "onPremisesSyncEnabled",
+    "proxyAddresses",
+    "signInSessionsValidFromDateTime",
+    "surname",
+    "userPrincipalName"
+  ].join(",");
 
-  const today = new Date()
-  const threeDaysBack = new Date(new Date().setDate(today.getDate() - 3))
+  const today = new Date();
+  const threeDaysBack = new Date(new Date().setDate(today.getDate() - 3));
 
   const batchRequest = {
     requests: [
       {
-        id: '1',
-        method: 'GET',
+        id: "1",
+        method: "GET",
         url: `/users/${user.userPrincipalName}?$select=${userProperties}` // Brukerens data
       },
       {
-        id: '2',
-        method: 'GET',
+        id: "2",
+        method: "GET",
         url: `/users/${user.userPrincipalName}/transitiveMemberOf?$top=999` // Brukerens grupper
       },
       {
-        id: '3',
-        method: 'GET',
+        id: "3",
+        method: "GET",
         url: `/users/${user.userPrincipalName}/authentication/methods` // Auth metoder
       },
       {
-        id: '4',
-        method: 'GET',
+        id: "4",
+        method: "GET",
         url: `/auditLogs/signIns?$filter=userPrincipalName eq '${user.userPrincipalName}' and status/errorCode eq 0 and createdDateTime gt ${entraIdDate(threeDaysBack)}&$top=1` // last successful sign ins
       },
       {
-        id: '5',
-        method: 'GET',
+        id: "5",
+        method: "GET",
         url: `/auditLogs/signIns?$filter=userPrincipalName eq '${user.userPrincipalName}' and status/errorCode ne 0 and createdDateTime gt ${entraIdDate()}&$top=30` // error sign ins
       },
       {
-        id: '6',
-        method: 'GET',
+        id: "6",
+        method: "GET",
         url: `/identityProtection/riskyUsers?$filter=userPrincipalName eq '${user.userPrincipalName}' and riskState ne 'dismissed' and riskState ne 'remediated' and riskState ne 'confirmedSafe'` // risky user check
       },
       {
-        id: '7',
-        method: 'GET',
+        id: "7",
+        method: "GET",
         url: `/users/${user.userPrincipalName}/ownedDevices` // Brukerens enheter
       }
     ]
-  }
+  };
 
-  logger('info', ['azure-get-data', 'fetching data from ms graph'])
-  const { responses } = await batchGraph(batchRequest, accessToken)
-  const failedRequest = responses.find(response => response.status !== 200 && response.status !== 429)
+  logger.info("azure-get-data - fetching data from ms graph");
+  const { responses } = await batchGraph(batchRequest, accessToken);
+  const failedRequest = responses.find((response) => response.status !== 200 && response.status !== 429);
   if (failedRequest) {
-    throw new Error(`Batch request feilet.. id: ${failedRequest.id}, Message: ${failedRequest.body?.error?.message}, Code: ${failedRequest.body?.error?.code}, status: ${failedRequest.status}`)
+    throw new Error(`Batch request feilet.. id: ${failedRequest.id}, Message: ${failedRequest.body?.error?.message}, Code: ${failedRequest.body?.error?.code}, status: ${failedRequest.status}`);
   }
-  const retryRequests = responses.filter(response => response.status === 429)
+  const retryRequests = responses.filter((response) => response.status === 429);
   if (retryRequests.length > 0) {
     /*
     retryAfters = retryRequests.map(req => req.headers['Retry-after'])
     ids = retryRequests.map(req => req.id)
     */
     // throw new Error(`Batch request fikk retry-after.. ider: ${ids.join(', ')}, retryAfters: ${retryAfters.join(', ')} json: ${JSON.stringify(retryRequests)}`)
-    throw new Error('Aiaiai, for mange spørringer mot MS Graph på en gang - her må vi bare vente altså, ta en kaffe...')
+    throw new Error("Aiaiai, for mange spørringer mot MS Graph på en gang - her må vi bare vente altså, ta en kaffe...");
   }
 
-  const currentSchoolYear = getSchoolYear()
-  const previousSchoolYear = getSchoolYear(1)
+  const currentSchoolYear = getSchoolYear();
+  const previousSchoolYear = getSchoolYear(1);
 
-  const userData = responses.find(res => res.id === '1').body
+  const userData = responses.find((res) => res.id === "1").body;
 
-  const graphUserGroups = responses.find(res => res.id === '2').body
-  const graphUserGroupsDisplayName = (graphUserGroups?.value && graphUserGroups.value.map(group => group.displayName).sort()) || []
-  const graphSDSGroups = (graphUserGroups && graphUserGroups.value && Array.isArray(graphUserGroups.value) && graphUserGroups.value.filter(group => group.mailNickname && group.mailNickname.startsWith('Section_'))) || []
-  const graphSDSGroupsCurrentYearDisplayName = graphSDSGroups.filter(group => group.mailNickname.includes(currentSchoolYear)).map(group => group.displayName).sort()
-  const graphSDSGroupsPreviousYearDisplayName = graphSDSGroups.filter(group => group.mailNickname.includes(previousSchoolYear)).map(group => group.displayName).sort()
+  const graphUserGroups = responses.find((res) => res.id === "2").body;
+  const graphUserGroupsDisplayName = graphUserGroups?.value?.map((group) => group.displayName).sort() || [];
+  const graphSDSGroups = (graphUserGroups?.value && Array.isArray(graphUserGroups.value) && graphUserGroups.value.filter((group) => group.mailNickname?.startsWith("Section_"))) || [];
+  const graphSDSGroupsCurrentYearDisplayName = graphSDSGroups
+    .filter((group) => group.mailNickname.includes(currentSchoolYear))
+    .map((group) => group.displayName)
+    .sort();
+  const graphSDSGroupsPreviousYearDisplayName = graphSDSGroups
+    .filter((group) => group.mailNickname.includes(previousSchoolYear))
+    .map((group) => group.displayName)
+    .sort();
 
-  const graphUserAuth = responses.find(res => res.id === '3').body
-  const graphUserAuthMethods = graphUserAuth?.value && graphUserAuth.value.length && graphUserAuth.value.filter(method => !method['@odata.type'].includes('passwordAuthenticationMethod'))
+  const graphUserAuth = responses.find((res) => res.id === "3").body;
+  const graphUserAuthMethods = graphUserAuth?.value?.length && graphUserAuth.value.filter((method) => !method["@odata.type"].includes("passwordAuthenticationMethod"));
 
-  const userSignInSuccess = responses.find(res => res.id === '4').body
+  const userSignInSuccess = responses.find((res) => res.id === "4").body;
 
-  const userSignInErrors = responses.find(res => res.id === '5').body
-  const filteredSignInErrors = userSignInErrors.value && userSignInErrors.value.filter(signIn => !excludeSignInErrors.includes(signIn.status.errorCode))
+  const userSignInErrors = responses.find((res) => res.id === "5").body;
+  const filteredSignInErrors = userSignInErrors.value?.filter((signIn) => !excludeSignInErrors.includes(signIn.status.errorCode));
 
-  const graphRiskyUser = responses.find(res => res.id === '6').body
+  const graphRiskyUser = responses.find((res) => res.id === "6").body;
 
-  const userDevices = responses.find(res => res.id === '7').body
-  const mappedUserDevices = userDevices.value && userDevices.value.map(device => {
-    delete device.alternativeSecurityIds
-    return device
-  })
+  const userDevices = responses.find((res) => res.id === "7").body;
+  const mappedUserDevices = userDevices.value?.map((device) => {
+    delete device.alternativeSecurityIds;
+    return device;
+  });
 
   return {
     ...userData,
@@ -186,7 +208,7 @@ const getData = async (user) => {
     userSignInSuccess: userSignInSuccess.value,
     graphRiskyUser: graphRiskyUser.value,
     userDevices: mappedUserDevices
-  }
-}
+  };
+};
 
-module.exports = { getData, callGraph }
+module.exports = { getData, callGraph };

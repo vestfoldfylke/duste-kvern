@@ -1,24 +1,21 @@
 {
   "name": "dust-request-handler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
-    "test-lint": "standard --fix"
+    "test": "biome check",
+    "lint:fix": "biome check --write"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vestfoldfylke/msal-token": "^1.0.1",
-    "@vtfk/logger": "^6.3.4",
-    "axios": "^1.12.2",
-    "dotenv": "^17.2.1",
-    "file-system-cache": "^2.4.7",
-    "mongodb": "^6.18.0"
+    "@azure/identity": "^4.13.1",
+    "@vestfoldfylke/loglady": "^1.5.3",
+    "mongodb": "^7.1.1"
   },
   "devDependencies": {
-    "standard": "^17.1.2"
+    "@biomejs/biome": "2.4.12"
   }
 }

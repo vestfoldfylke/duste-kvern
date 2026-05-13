@@ -1,28 +1,24 @@
-const { getMsalToken } = require('../../lib/get-msal-token')
-const { APPREG, FINTFOLK } = require('../../config')
-const { callFintFolk } = require('../fint-larer/get-data')
+const { getEntraToken } = require("../../lib/get-entra-token");
+const { FINTFOLK } = require("../../config");
+const { callFintFolk } = require("../fint-larer/get-data");
 
 const getData = async (user) => {
   // Hent et token
-  const clientConfig = {
-    clientId: APPREG.CLIENT_ID,
-    tenantId: APPREG.TENANT_ID,
-    tenantName: APPREG.TENANT_NAME,
-    clientSecret: APPREG.CLIENT_SECRET,
-    scope: FINTFOLK.SCOPE
-  }
-  const accessToken = await getMsalToken(clientConfig)
+  const accessToken = await getEntraToken(FINTFOLK.SCOPE);
+
   try {
-    const fintStudent = await callFintFolk(`student/feidenavn/${user.feidenavn}?skipCache=true`, accessToken) // Kan legge til skipCache=true for å alltid hente fra FINT dersom det trengs (gjelder også de andre fint-kallene)
-    delete fintStudent.bostedsadresse // Just in case
-    delete fintStudent.hybeladresse // Just in case
-    return fintStudent
+    const fintStudent = await callFintFolk(`student/feidenavn/${user.feidenavn}?skipCache=true`, accessToken); // Kan legge til skipCache=true for å alltid hente fra FINT dersom det trengs (gjelder også de andre fint-kallene)
+    delete fintStudent.bostedsadresse; // Just in case
+    delete fintStudent.hybeladresse; // Just in case
+
+    return fintStudent;
   } catch (error) {
     if (error.response?.status === 404) {
-      return null
+      return null;
     }
-    throw error
-  }
-}
 
-module.exports = { getData, callFintFolk }
+    throw error;
+  }
+};
+
+module.exports = { getData, callFintFolk };

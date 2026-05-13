@@ -21,6 +21,9 @@ Henter nå brukere fra EntraID, grunnnet elever i sky
 Sorteres på ulike brukertyper (ansattVFYLKE, ansattVTFK, elev osv...)
 
 ## duste-kverna
+
+`index.js` and `indexThreader` needs to be started with `--env-file` argument like this: `node --env-file=.env index.js` (or `indexThreader.js`)
+
 ### index.js
 - Henter nye rapporter fra mongodb
   - Setter rapporter til hentet, slik at de ikke hentes dobbelt opp

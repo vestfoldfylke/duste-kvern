@@ -1,37 +1,40 @@
-const { success, error } = require('../lib/test-result')
-const systemNames = require('../systems/system-names')
-const adTests = require('../systems/ad/common-tests')
-const azureTests = require('../systems/azure/common-tests')
-const fintAnsattTests = require('../systems/fint-ansatt/common-tests')
-const syncTests = require('../systems/sync/common-tests')
-const feideTests = require('../systems/feide/common-tests')
-const fintLarerTests = require('../systems/fint-larer/common-tests')
-const { APPREG: { TENANT_NAME } } = require('../config')
+const { success, error } = require("../lib/test-result");
+const systemNames = require("../systems/system-names");
+const adTests = require("../systems/ad/common-tests");
+const azureTests = require("../systems/azure/common-tests");
+const fintAnsattTests = require("../systems/fint-ansatt/common-tests");
+const syncTests = require("../systems/sync/common-tests");
+const feideTests = require("../systems/feide/common-tests");
+const fintLarerTests = require("../systems/fint-larer/common-tests");
+const {
+  APPREG: { TENANT_NAME }
+} = require("../config");
 
 const systemsAndTests = [
   // System
   {
-    id: 'ad',
+    id: "ad",
     name: systemNames.ad,
     // Tester
     tests: [
       {
-        id: 'ad-upn',
-        title: 'UPN er korrekt',
-        description: 'Sjekker at UPN er korrekt',
+        id: "ad-upn",
+        title: "UPN er korrekt",
+        description: "Sjekker at UPN er korrekt",
         waitForAllData: false,
         /**
          *
-         * @param {*} user kan slenge inn jsDocs for en user fra mongodb
+         * @param {*} _user kan slenge inn jsDocs for en user fra mongodb
          * @param {*} systemData Kan slenge inn jsDocs for at dette er graph-data f. eks
          */
-        test: (user, systemData) => {
-          if (!systemData.userPrincipalName) return error({ message: 'UPN mangler 😬', raw: systemData })
+        test: (_user, systemData) => {
+          if (!systemData.userPrincipalName) return error({ message: "UPN mangler 😬", raw: systemData });
           const data = {
             userPrincipalName: systemData.userPrincipalName
-          }
-          if (!data.userPrincipalName.endsWith(`@${TENANT_NAME}.no`)) return error({ message: 'UPN (brukernavn til Microsoft 365) er ikke korrekt', raw: data, solution: 'Meld sak til arbeidsgruppe IDM i Pureservice' })
-          return success({ message: 'UPN (brukernavn til Microsoft 365) er korrekt for ansatt', raw: data })
+          };
+          if (!data.userPrincipalName.endsWith(`@${TENANT_NAME}.no`))
+            return error({ message: "UPN (brukernavn til Microsoft 365) er ikke korrekt", raw: data, solution: "Meld sak til arbeidsgruppe IDM i Pureservice" });
+          return success({ message: "UPN (brukernavn til Microsoft 365) er korrekt for ansatt", raw: data });
         }
       },
       adTests.adAktiveringAnsatt,
@@ -45,7 +48,7 @@ const systemsAndTests = [
     ]
   },
   {
-    id: 'azure',
+    id: "azure",
     name: systemNames.azure,
     // Tester
     tests: [
@@ -54,22 +57,24 @@ const systemsAndTests = [
       azureTests.azureLicenseManuallyChanged,
       azureTests.azureLicenseA1,
       {
-        id: 'azure_upn',
-        title: 'UPN er korrekt',
-        description: 'Sjekker at UPN er korrekt for ansatt',
+        id: "azure_upn",
+        title: "UPN er korrekt",
+        description: "Sjekker at UPN er korrekt for ansatt",
         waitForAllData: false,
         /**
          *
-         * @param {*} user kan slenge inn jsDocs for en user fra mongodb
+         * @param {*} _user kan slenge inn jsDocs for en user fra mongodb
          * @param {*} systemData Kan slenge inn jsDocs for at dette er graph-data f. eks
          */
-        test: (user, systemData) => {
+        test: (_user, systemData) => {
           const data = {
             userPrincipalName: systemData.userPrincipalName
-          }
-          if (systemData.userPrincipalName.includes('.onmicrosoft.com')) return error({ message: 'UPN (brukernavn til Microsoft 365) er ikke korrekt 😬', raw: data, solution: 'Meld sak til arbeidsgruppe IDM i Pureservice' })
-          if (!data.userPrincipalName.endsWith(`@${TENANT_NAME}.no`)) return error({ message: 'UPN (brukernavn til Microsoft 365) er ikke korrekt', raw: data, solution: 'Meld sak til arbeidsgruppe IDM i Pureservice' })
-          return success({ message: 'UPN (brukernavn til Microsoft 365) er korrekt for ansatt', raw: data })
+          };
+          if (systemData.userPrincipalName.includes(".onmicrosoft.com"))
+            return error({ message: "UPN (brukernavn til Microsoft 365) er ikke korrekt 😬", raw: data, solution: "Meld sak til arbeidsgruppe IDM i Pureservice" });
+          if (!data.userPrincipalName.endsWith(`@${TENANT_NAME}.no`))
+            return error({ message: "UPN (brukernavn til Microsoft 365) er ikke korrekt", raw: data, solution: "Meld sak til arbeidsgruppe IDM i Pureservice" });
+          return success({ message: "UPN (brukernavn til Microsoft 365) er korrekt for ansatt", raw: data });
         }
       },
       azureTests.azureAktiveringAnsatt,
@@ -88,7 +93,7 @@ const systemsAndTests = [
     ]
   },
   {
-    id: 'fint-ansatt',
+    id: "fint-ansatt",
     name: systemNames.fintAnsatt,
     tests: [
       fintAnsattTests.fintAnsattData,
@@ -104,7 +109,7 @@ const systemsAndTests = [
     ]
   },
   {
-    id: 'fint-larer',
+    id: "fint-larer",
     name: systemNames.fintLarer,
     // Tester
     tests: [
@@ -119,7 +124,7 @@ const systemsAndTests = [
     ]
   },
   {
-    id: 'sync',
+    id: "sync",
     name: systemNames.sync,
     // Tester
     tests: [
@@ -128,13 +133,11 @@ const systemsAndTests = [
     ]
   },
   {
-    id: 'feide',
+    id: "feide",
     name: systemNames.feide,
     // Tester
-    tests: [
-      feideTests.feideAnsatt
-    ]
+    tests: [feideTests.feideAnsatt]
   }
-]
+];
 
-module.exports = { systemsAndTests }
+module.exports = { systemsAndTests };
