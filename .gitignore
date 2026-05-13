@@ -130,9 +130,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# file-system-cache
-.*cache
-
 # datafiles
 users.json
 users.txt

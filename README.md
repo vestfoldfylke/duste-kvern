@@ -22,7 +22,7 @@ Sorteres på ulike brukertyper (ansattVFYLKE, ansattVTFK, elev osv...)
 
 ## duste-kverna
 
-`index.js`, `indexFileCache` and `indexThreader` needs to started with `--env-file` argument like this: `node --env-file=.env index.js` (or `indexFileCache.js` or `indexThreader.js`)
+`index.js` and `indexThreader` needs to be started with `--env-file` argument like this: `node --env-file=.env index.js` (or `indexThreader.js`)
 
 ### index.js
 - Henter nye rapporter fra mongodb
