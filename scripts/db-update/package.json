@@ -2,12 +2,13 @@
   "name": "db-update",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start:sds": "node --env-file=../../.env index.js sds",
-    "start:users": "node --env-file=../../.env index.js users",
-    "start:ot": "node --env-file=../../.env index.js ot",
-    "start:laerling": "node --env-file=../../.env index.js laerling"
+    "start:sds": "node --env-file=../../.env ../../dist/scripts/db-update/index.js sds",
+    "start:users": "node --env-file=../../.env ../../dist/scripts/db-update/index.js users",
+    "start:ot": "node --env-file=../../.env ../../dist/scripts/db-update/index.js ot",
+    "start:laerling": "node --env-file=../../.env ../../dist/scripts/db-update/index.js laerling"
   },
   "keywords": [],
   "author": {
@@ -17,7 +18,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@vestfoldfylke/loglady": "^1.5.3",
-    "mongodb": "^7.1.1"
+    "@vestfoldfylke/loglady": "^2.1.0",
+    "mongodb": "^7.5.0"
   }
 }

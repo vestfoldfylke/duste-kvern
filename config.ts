@@ -1,0 +1,70 @@
+const config = {
+  NODE_ENV: process.env.NODE_ENV || "production",
+  GET_NEW_REPORTS_INTERVAL: process.env.GET_READY_REQUESTS_INTERVAL || 1000,
+  RUN_READY_REPORTS_INTERVAL: process.env.RUN_READY_REQUESTS_INTERVAL || 1000,
+  COUNTY_OU: process.env.COUNTY_OU,
+  MONGODB: {
+    CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
+    DB_NAME: process.env.MONGODB_DB_NAME,
+    REPORT_COLLECTION: process.env.MONGODB_REPORT_COLLECTION,
+    USERS_COLLECTION: process.env.MONGODB_USERS_COLLECTION
+  },
+  APPREG: {
+    TENANT_NAME: process.env.APPREG_TENANT_NAME
+  },
+  APPREG_VTFK: {
+    TENANT_NAME: process.env.APPREG_VTFK_TENANT_NAME
+  },
+  GRAPH: {
+    SCOPE: process.env.GRAPH_SCOPE || "https://graph.microsoft.com/.default",
+    URL: process.env.GRAPH_URL || "https://graph.microsoft.com"
+  },
+  FINTFOLK: {
+    SCOPE: process.env.FINTFOLK_SCOPE,
+    URL: process.env.FINTFOLK_URL
+  },
+  VISMA: {
+    COMPANY_ID: process.env.VISMA_COMPANY_ID || "1",
+    CATEGORIES: process.env.VISMA_CATEGORIES || "O,SE,TK,X,XA,XB,FW"
+  },
+  SDWORX: {
+    EXCLUDED_CATEGORIES: (process.env.SDWORX_EXCLUDED_CATEGORIES && typeof process.env.SDWORX_EXCLUDED_CATEGORIES === "string" && process.env.SDWORX_EXCLUDED_CATEGORIES.split(",")) || [
+      "O",
+      "SE",
+      "TK",
+      "X",
+      "XA",
+      "XB",
+      "FW"
+    ]
+  },
+  FEIDE: {
+    PRINCIPAL_NAME: process.env.FEIDE_PRINCIPAL_NAME || "@vtfk.no"
+  },
+  NETTSPERRE: {
+    DB_NAME: process.env.NETTSPERRE_DB_NAME,
+    COLLECTION_NAME: process.env.NETTSPERRE_COLLECTION_NAME
+  },
+  PS1_SCRIPTS_PATH: process.env.PS1_SCRIPTS_PATH || "D:/DUST-TEST/duste-kvern/scripts",
+  MAX_BUFFER: process.env.MAX_BUFFER || 1024 * 10000
+};
+
+export const {
+  NODE_ENV,
+  GET_NEW_REPORTS_INTERVAL,
+  RUN_READY_REPORTS_INTERVAL,
+  COUNTY_OU,
+  MONGODB,
+  APPREG,
+  APPREG_VTFK,
+  GRAPH,
+  FINTFOLK,
+  VISMA,
+  SDWORX,
+  FEIDE,
+  NETTSPERRE,
+  PS1_SCRIPTS_PATH,
+  MAX_BUFFER
+} = config;
+
+export default config;

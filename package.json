@@ -2,10 +2,15 @@
   "name": "dust-request-handler",
   "version": "1.0.1",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "test": "biome check",
-    "lint:fix": "biome check --write"
+    "lint:fix": "biome check --write",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "start": "node --env-file=.env dist/index.js",
+    "start:threader": "node --env-file=.env dist/indexThreader.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +21,8 @@
     "mongodb": "^7.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.6"
+    "@biomejs/biome": "2.5.6",
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2"
   }
 }

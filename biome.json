@@ -13,14 +13,17 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "expand": "auto",
-    "includes": ["**", "!node_modules", "!!package.json"]
+    "includes": ["**", "!node_modules", "!dist", "!!package.json"]
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "suspicious": {
+        "noExplicitAny": "warn"
+      }
     },
-    "includes": ["**", "!node_modules", "!!package.json"]
+    "includes": ["**", "!node_modules", "!dist", "!!package.json"]
   },
   "javascript": {
     "formatter": {
