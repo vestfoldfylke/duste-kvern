@@ -12,10 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "@azure/identity": "^4.13.1",
-    "@vestfoldfylke/loglady": "^1.5.3",
-    "mongodb": "^7.1.1"
+    "@vestfoldfylke/loglady": "^2.1.0",
+    "mongodb": "^7.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.12"
+    "@biomejs/biome": "2.5.6"
   }
 }
