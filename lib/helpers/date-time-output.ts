@@ -2,7 +2,7 @@ const padDate = (num: number): string => {
   return num >= 10 ? String(num) : `0${num}`;
 };
 
-export const prettifyDateToLocaleString = (date: Date, dateOnly = false): string => {
+export const prettifyDateToLocaleString = (date: Date, dateOnly: boolean = false): string => {
   let myDate: string | undefined;
 
   if (date instanceof Date) {
@@ -18,12 +18,14 @@ export const prettifyDateToLocaleString = (date: Date, dateOnly = false): string
     });
   }
 
-  if (!myDate) return "";
+  if (!myDate) {
+    return "";
+  }
 
   myDate = myDate.replace(",", "");
 
   if (myDate.includes("/")) {
-    const split = myDate.split("/");
+    const split: string[] = myDate.split("/");
     return `${split[1]}.${split[0]}.${split[2]}`;
   }
 

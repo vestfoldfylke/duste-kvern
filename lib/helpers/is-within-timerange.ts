@@ -1,8 +1,9 @@
-type TimeRangeResult = {
+export type TimeRangeResult = {
   result: boolean;
   seconds: number;
 };
 
+/** Validerer at angitte tidspunkt maks differensierer angitte seconds. */
 export const isWithinTimeRange = (one: Date, two: Date, seconds = 15): TimeRangeResult => {
   if (one.toString() === "Invalid Date" || two.toString() === "Invalid Date") {
     return {
@@ -11,9 +12,11 @@ export const isWithinTimeRange = (one: Date, two: Date, seconds = 15): TimeRange
     };
   }
 
-  if (seconds < 0) seconds = -seconds;
+  if (seconds < 0) {
+    seconds = -seconds;
+  }
 
-  const diff = (two.getTime() - one.getTime()) / 1000;
+  const diff: number = (two.getTime() - one.getTime()) / 1000;
   return {
     result: diff <= seconds && diff >= -seconds,
     seconds: diff

@@ -1,3 +1,5 @@
+import type { FailedGetDataSystemData, SystemData } from "../types/system-data.js";
+
 type ResultStatus = "ok" | "warning" | "error" | "ignore" | "no-data";
 
 type ResultOptions = {
@@ -7,7 +9,7 @@ type ResultOptions = {
   status?: ResultStatus;
 };
 
-type TestResult = {
+export type TestResult = {
   status: ResultStatus;
   message: string;
   solution?: string;
@@ -43,4 +45,8 @@ export const error = (result: ResultOptions): TestResult => getResultObject(resu
 
 export const ignore = (): TestResult => getResultObject({ message: "irrelevant" }, "ignore");
 
-export const noData = (message?: string): TestResult => getResultObject({ message: message || "Mangler data..." }, "no-data");
+/*export const noData = (message?: string): TestResult => getResultObject({ message: message || "Mangler data..." }, "no-data");*/
+
+export const isFailedSystemData = (systemData: SystemData | undefined): systemData is FailedGetDataSystemData => {
+  return systemData !== null && systemData !== undefined && "getDataFailed" in systemData && systemData.getDataFailed;
+};

@@ -1,7 +1,6 @@
 const systemNames = {
   ad: "AD",
   azure: "Entra ID (Microsoft 365)",
-  equitrac: "Equitrac (utskrift)",
   feide: "FEIDE",
   fintLarer: "InSchool",
   fintAnsatt: "SD Worx (HR / FINT)",

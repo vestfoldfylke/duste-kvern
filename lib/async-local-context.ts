@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { logger } from "@vestfoldfylke/loglady";
+import { type LogConfig, logger } from "@vestfoldfylke/loglady";
 
-const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
+const asyncLocalStorage = new AsyncLocalStorage<LogConfig>();
 
-export const runInContext = async <T>(logConfig: Record<string, unknown>, callback: () => Promise<T>): Promise<T> => {
-  logger.setContextProvider(() => asyncLocalStorage.getStore());
+export const runInContext = async <T>(logConfig: LogConfig, callback: () => Promise<T>): Promise<T> => {
+  logger.setContextProvider((): LogConfig | undefined => asyncLocalStorage?.getStore());
   return asyncLocalStorage.run(logConfig, callback);
 };

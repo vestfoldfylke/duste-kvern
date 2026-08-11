@@ -1,6 +1,5 @@
-export const hasData = (obj: unknown): boolean =>
-  obj !== null ? (Array.isArray(obj) ? obj.length > 0 : typeof obj === "object" ? Object.getOwnPropertyNames(obj).filter((prop) => prop !== "length").length > 0 : typeof obj !== "undefined") : false;
+import type { SystemData } from "../../types/system-data.js";
 
-export const getArray = <T>(obj: T | T[]): T[] => (Array.isArray(obj) ? obj : [obj]).filter((o) => !!o);
-
-export const getArrayData = <T>(data: T | T[]): T => getArray(data)[0];
+export const getSystemData = <T>(systemData: SystemData): T => {
+  return systemData as T;
+};

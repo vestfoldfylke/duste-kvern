@@ -5,12 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "test": "biome check",
+    "test": "biome check && npm run typecheck",
     "lint:fix": "biome check --write",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
+    "prestart": "npm run build",
     "start": "node --env-file=.env dist/index.js",
-    "start:threader": "node --env-file=.env dist/indexThreader.js"
+    "start:threader": "npm run build && node --env-file=.env dist/indexThreader.js"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.6",
+    "@microsoft/microsoft-graph-types": "^2.43.1",
     "@types/node": "^26.1.2",
     "typescript": "^7.0.2"
   }

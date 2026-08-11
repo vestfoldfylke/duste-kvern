@@ -1,9 +1,11 @@
 import { logger } from "@vestfoldfylke/loglady";
+import type { Collection, Db, MongoClient, WithId } from "mongodb";
 import { GET_NEW_REPORTS_INTERVAL, MONGODB } from "./config.js";
 import { handleDustReport } from "./lib/handle-dust-report.js";
 import { getMongoClient } from "./lib/mongo-client.js";
+import type { Report } from "./types/system-tests.js";
 
-let readyForNewReports = true;
+let readyForNewReports: boolean = true;
 
 const getAndRunNewReports = async (): Promise<number | null> => {
   if (!readyForNewReports) {
@@ -14,22 +16,30 @@ const getAndRunNewReports = async (): Promise<number | null> => {
   readyForNewReports = false;
 
   try {
-    const client = await getMongoClient();
-    const db = client.db(MONGODB.DB_NAME);
-    const collection = db.collection(MONGODB.REPORT_COLLECTION as string);
-    const newReports = await collection.find({ ready: true }).toArray();
+    const client: MongoClient = await getMongoClient();
+    const db: Db = client.db(MONGODB.DB_NAME);
+    const collection: Collection<Report> = db.collection<Report>(MONGODB.REPORT_COLLECTION as string);
+    const newReports: WithId<Report>[] = await collection.find({ ready: true }).toArray();
 
-    const updateProps = { ready: false, queued: true, running: true, startedTimestamp: new Date().toISOString() };
+    const updateProps: Partial<Report> = {
+      ready: false,
+      queued: true,
+      running: true,
+      startedTimestamp: new Date().toISOString()
+    };
 
-    await collection.updateMany({ _id: { $in: newReports.map((doc: any) => doc._id) } }, { $set: updateProps });
+    await collection.updateMany({ _id: { $in: newReports.map((doc: WithId<Report>) => doc._id) } }, { $set: updateProps });
     readyForNewReports = true;
 
     if (newReports.length > 0) {
       logger.info("index - getAndRunNewReports - Got {NewReportCount} new reports", newReports.length);
     }
 
-    newReports.forEach((report: any) => {
-      const merged = { ...report, ...updateProps };
+    newReports.forEach((report: WithId<Report>) => {
+      const merged: WithId<Report> = {
+        ...report,
+        ...updateProps
+      };
       handleDustReport(merged);
     });
 

@@ -2,20 +2,22 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { logger } from "@vestfoldfylke/loglady";
+import type { Collection, InsertManyResult, MongoClient } from "mongodb";
+import type { TestUser } from "../../types/system-tests.js";
 import { getDusteUsers } from "./lib/get-duste-users.js";
 import mongo from "./lib/mongo.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname: string = dirname(fileURLToPath(import.meta.url));
 
-const args = process.argv.slice(2);
+const args: string[] = process.argv.slice(2);
 if (args.length === 0) {
   logger.warn("lib - update-database - Tell me what update to do!\n- users\n- sds");
   process.exit(1);
 }
 
-const updateType = args[0].toLowerCase();
+const updateType: string = args[0].toLowerCase();
 
-let data: any[];
+let data: TestUser[];
 if (updateType === "users") {
   try {
     data = await getDusteUsers();
@@ -26,16 +28,16 @@ if (updateType === "users") {
     process.exit(1);
   }
 } else {
-  const raw = await readFile(join(__dirname, `./data/${updateType}.json`), "utf-8");
-  data = JSON.parse(raw);
+  const raw: string = await readFile(join(__dirname, `./data/${updateType}.json`), "utf-8");
+  data = JSON.parse(raw) as TestUser[];
 }
 
-const mongoClient = mongo();
-const db = mongoClient.db(process.env.MONGODB_DB_NAME).collection(process.env.MONGODB_USERS_COLLECTION as string);
+const mongoClient: MongoClient = mongo();
+const db: Collection<TestUser> = mongoClient.db(process.env.MONGODB_DB_NAME).collection<TestUser>(process.env.MONGODB_USERS_COLLECTION as string);
 
 if (updateType === "users") {
-  const now = new Date().toISOString();
-  data = data.map((user: any) => {
+  const now: string = new Date().toISOString();
+  data = data.map((user: TestUser) => {
     if (!user.displayName) {
       return user;
     }
@@ -52,7 +54,7 @@ if (updateType === "users") {
     };
   });
 
-  const usersPath = join(__dirname, "./data/users.json");
+  const usersPath: string = join(__dirname, "./data/users.json");
   await writeFile(usersPath, JSON.stringify(data, null, 2));
 }
 
@@ -68,7 +70,7 @@ try {
 
 logger.info("lib - update-database - UpdateType: {UpdateType} - insert data - {DataLength} - start", updateType, data.length);
 try {
-  const result = await db.insertMany(data);
+  const result: InsertManyResult<TestUser> = await db.insertMany(data);
   logger.info("lib - update-database - UpdateType: {UpdateType} - insert data - InsertedCount: {InsertedCount}", updateType, result.insertedCount);
 } catch (err) {
   logger.errorException(err, "lib - update-database - UpdateType: {UpdateType} - update data - failed to insert data", updateType);

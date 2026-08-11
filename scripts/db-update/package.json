@@ -20,5 +20,8 @@
   "dependencies": {
     "@vestfoldfylke/loglady": "^2.1.0",
     "mongodb": "^7.5.0"
+  },
+  "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.43.1"
   }
 }

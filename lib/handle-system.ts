@@ -1,40 +1,74 @@
 import { logger } from "@vestfoldfylke/loglady";
-import { ObjectId } from "mongodb";
+import { type Collection, ObjectId, type WithId } from "mongodb";
+import type { AllSystemData, SystemData } from "../types/system-data.js";
+import type { Report, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
+import type { GetData, SystemInWorkerResponse } from "../types/worker.js";
+import { CustomError } from "./CustomError.js";
+import { HTTPError } from "./helpers/HTTPError.js";
 
-export const handleSystem = async (system: any, correspondingSystemInOverview: any, report: any, mongoCollection: any) => {
-  let getDataFunction: (user: any) => Promise<any>;
+export const handleSystem = async (
+  system: SystemTests,
+  correspondingSystemInOverview: SystemWithTestsResult,
+  report: WithId<Report>,
+  mongoCollection: Collection<Report>
+): Promise<SystemInWorkerResponse> => {
+  let getDataFunction: GetData;
 
   try {
-    const mod = await import(`../systems/${system.id}/get-data.js`);
+    const mod: { getData: GetData } = await import(`../systems/${system.id}/get-data.js`);
     getDataFunction = mod.getData;
   } catch (err) {
     logger.errorException(err, "handle-system - Could not find get-data-function (../systems/{FileSystemId}/get-data.js) for system {SystemId}", system.id, system.id);
     getDataFunction = async () => null;
   }
 
-  let systemData: any;
+  let systemData: SystemData | null;
 
   try {
     systemData = await getDataFunction(report.user);
-  } catch (err: any) {
+  } catch (err) {
     logger.errorException(err, "handle-system - Failed when running get-data-function for SystemId {SystemId}", system.id);
-    systemData = {
-      getDataFailed: true,
-      message: `Failed when running get-data-function for ${system.id}`,
-      error: err.response?.data || err.stack || err.toString(),
-      customMessage: err.customMessage || null
-    };
+
+    if (err instanceof HTTPError) {
+      systemData = {
+        getDataFailed: true,
+        message: `Failed when running get-data-function for ${system.id}`,
+        error: err?.data || err.stack || err.toString()
+      };
+    } else if (err instanceof CustomError) {
+      systemData = {
+        getDataFailed: true,
+        message: `Failed when running get-data-function for ${system.id}`,
+        error: err.stack || err.toString(),
+        customMessage: err.customMessage || null
+      };
+    } else {
+      const error = err as Error;
+      systemData = {
+        getDataFailed: true,
+        message: `Failed when running get-data-function for ${system.id}`,
+        error: error.stack || error.toString()
+      };
+    }
   }
 
   correspondingSystemInOverview.data = systemData;
 
-  const testsToRun = system.tests.filter((test: any) => !test.waitForAllData);
+  const testsToRun: TestCase[] = system.tests.filter((test: TestCase) => !test.waitForAllData);
   for (const test of testsToRun) {
     logger.info("handle-system - Running test {TestId} on system {SystemId}", test.id, system.id);
-    test.mappedTestFunction(report.user, systemData);
+    test.mappedTestFunction?.(report.user, systemData as SystemData);
   }
 
   correspondingSystemInOverview.finishedTimestamp = new Date().toISOString();
+  if (!correspondingSystemInOverview.startedTimestamp) {
+    logger.warn(
+      "startedTimestamp is not set on correspondingSystemInOverview for system {System} in ReportId {ReportId}. Setting it to the same as finishedTimestamp",
+      system.id,
+      report._id.toString()
+    );
+    correspondingSystemInOverview.startedTimestamp = correspondingSystemInOverview.finishedTimestamp;
+  }
   correspondingSystemInOverview.runtime = new Date(correspondingSystemInOverview.finishedTimestamp).getTime() - new Date(correspondingSystemInOverview.startedTimestamp).getTime();
 
   logger.info("handle-system - Finished running get-data-function and instant tests for system {SystemId}, saving to db", system.id);
@@ -47,12 +81,12 @@ export const handleSystem = async (system: any, correspondingSystemInOverview: a
   return { [system.id]: systemData };
 };
 
-export const handleWaitingTests = async (system: any, correspondingSystemInOverview: any, report: any, allData: any) => {
-  const testsToRun = system.tests.filter((test: any) => test.waitForAllData);
+export const handleWaitingTests = async (system: SystemTests, correspondingSystemInOverview: SystemWithTestsResult, report: WithId<Report>, allData: AllSystemData): Promise<void> => {
+  const testsToRun: TestCase[] = system.tests.filter((test: TestCase) => test.waitForAllData);
 
   for (const test of testsToRun) {
     logger.info("handle-system - Running test {TestId} on system {SystemId}", test.id, system.id);
-    test.mappedTestFunction(report.user, correspondingSystemInOverview.data, allData);
+    test.mappedTestFunction?.(report.user, correspondingSystemInOverview.data, allData);
   }
 
   logger.info("handle-system - Finished running waiting tests for system {SystemId}", system.id);

@@ -1,12 +1,24 @@
+import type * as GraphTypes from "@microsoft/microsoft-graph-types";
 import { logger } from "@vestfoldfylke/loglady";
 import { GRAPH } from "../../config.js";
 import { getEntraToken } from "../../lib/get-entra-token.js";
 import { entraIdDate } from "../../lib/helpers/date-time-output.js";
+import type { Groups } from "../../scripts/db-update/types/graph.js";
+import type { AzureDataWrapper, BatchRequest, BatchRequestResponse, BatchRequestResponseType } from "../../types/azure.js";
+import type {
+  AzureRiskyUserSystemDataObject,
+  AzureSystemData,
+  AzureUserAuthenticationMethodSystemDataObject,
+  AzureUserDeviceSystemDataObject,
+  AzureUserSignInSystemDataObject,
+  AzureUserSystemDataObject
+} from "../../types/system-data.js";
+import type { TestUser } from "../../types/system-tests.js";
 
-const excludeSignInErrors = [70043];
+const excludeSignInErrors: number[] = [70043];
 
-export const callGraph = async (resource: string, accessBearer: string): Promise<any> => {
-  const response = await fetch(`${GRAPH.URL}/v1.0/${resource}`, {
+export const callGraph = async <T>(resource: string, accessBearer: string): Promise<AzureDataWrapper<T>> => {
+  const response: Response = await fetch(`${GRAPH.URL}/v1.0/${resource}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessBearer}`
@@ -14,16 +26,16 @@ export const callGraph = async (resource: string, accessBearer: string): Promise
   });
 
   if (!response.ok) {
-    const errorBody = await response.json();
+    const errorBody: unknown = await response.json();
     logger.errorException(errorBody, "Failed to fetch {Resource} graph data. Status: {Status}, StatusText: {StatusText}", resource, response.status, response.statusText);
     throw new Error(`Failed to fetch ${resource} graph data. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${errorBody}`);
   }
 
-  return response.json();
+  return (await response.json()) as AzureDataWrapper<T>;
 };
 
-const batchGraph = async (batchRequest: unknown, accessBearer: string): Promise<any> => {
-  const response = await fetch(`${GRAPH.URL}/v1.0/$batch`, {
+const batchGraph = async (batchRequest: BatchRequest, accessBearer: string): Promise<BatchRequestResponse> => {
+  const response: Response = await fetch(`${GRAPH.URL}/v1.0/$batch`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessBearer}`,
@@ -33,18 +45,18 @@ const batchGraph = async (batchRequest: unknown, accessBearer: string): Promise<
   });
 
   if (!response.ok) {
-    const errorBody = await response.json();
+    const errorBody: unknown = await response.json();
     logger.errorException(errorBody, "Failed to POST graph batch request. Status: {Status}, StatusText: {StatusText}", response.status, response.statusText);
     throw new Error(`Failed to POST graph batch request. Status: ${response.status}, StatusText: ${response.statusText}. Error: ${errorBody}`);
   }
 
-  return response.json();
+  return (await response.json()) as BatchRequestResponse;
 };
 
-const getSchoolYear = (yearsBack = 0): string => {
-  const today = new Date();
-  const currentMonth = today.getMonth() + 1;
-  const currentYear = Number.parseInt(today.getFullYear().toString().slice(-2), 10) - yearsBack;
+const getSchoolYear = (yearsBack: number = 0): string => {
+  const today: Date = new Date();
+  const currentMonth: number = today.getMonth() + 1;
+  const currentYear: number = Number.parseInt(today.getFullYear().toString().slice(-2), 10) - yearsBack;
 
   if (currentMonth >= 8 && currentMonth <= 12) {
     return `${currentYear}${currentYear + 1}`;
@@ -53,10 +65,10 @@ const getSchoolYear = (yearsBack = 0): string => {
   return `${currentYear - 1}${currentYear}`;
 };
 
-export const getData = async (user: { userPrincipalName: string }): Promise<any> => {
-  const bearer = await getEntraToken(GRAPH.SCOPE);
+export const getData = async (user: TestUser): Promise<AzureSystemData> => {
+  const bearer: string = await getEntraToken(GRAPH.SCOPE);
 
-  const userProperties = [
+  const userProperties: string = [
     "id",
     "accountEnabled",
     "assignedLicenses",
@@ -83,10 +95,10 @@ export const getData = async (user: { userPrincipalName: string }): Promise<any>
     "userPrincipalName"
   ].join(",");
 
-  const today = new Date();
-  const threeDaysBack = new Date(new Date().setDate(today.getDate() - 3));
+  const today: Date = new Date();
+  const threeDaysBack: Date = new Date(new Date().setDate(today.getDate() - 3));
 
-  const batchRequest = {
+  const batchRequest: BatchRequest = {
     requests: [
       {
         id: "1",
@@ -128,47 +140,71 @@ export const getData = async (user: { userPrincipalName: string }): Promise<any>
 
   logger.info("azure-get-data - fetching data from ms graph");
   const { responses } = await batchGraph(batchRequest, bearer);
-  const failedRequest = responses.find((response: any) => response.status !== 200 && response.status !== 429);
+  const failedRequest: BatchRequestResponseType | undefined = responses.find((response: BatchRequestResponseType) => response.status !== 200 && response.status !== 429);
   if (failedRequest) {
-    throw new Error(`Batch request feilet.. id: ${failedRequest.id}, Message: ${failedRequest.body?.error?.message}, Code: ${failedRequest.body?.error?.code}, status: ${failedRequest.status}`);
+    if ("error" in failedRequest.body) {
+      throw new Error(`Batch request feilet.. id: ${failedRequest.id}, Message: ${failedRequest.body?.error?.message}, Code: ${failedRequest.body?.error?.code}, status: ${failedRequest.status}`);
+    }
+
+    throw new Error(`Batch request feilet.. id: ${failedRequest.id}, Message: "error" property not found..., status: ${failedRequest.status}`);
   }
-  const retryRequests = responses.filter((response: any) => response.status === 429);
+  const retryRequests: BatchRequestResponseType[] = responses.filter((response: BatchRequestResponseType) => response.status === 429);
   if (retryRequests.length > 0) {
-    throw new Error("Aiaiai, for mange spørringer mot MS Graph på en gang - her må vi bare vente altså, ta en kaffe...");
+    throw new Error(
+      `Aiaiai, for mange spørringer mot MS Graph på en gang - her må vi bare vente altså, ta en kaffe... ${retryRequests.length} spørringer av ${batchRequest.requests.length} venter...`
+    );
   }
 
-  const currentSchoolYear = getSchoolYear();
-  const previousSchoolYear = getSchoolYear(1);
+  const currentSchoolYear: string = getSchoolYear();
+  const previousSchoolYear: string = getSchoolYear(1);
 
-  const userData = responses.find((res: any) => res.id === "1").body;
+  const userData: AzureUserSystemDataObject | undefined = responses.find((res: BatchRequestResponseType) => res.id === "1")?.body as AzureUserSystemDataObject;
+  if (!userData) {
+    logger.error("UserData with BatchRequestId {BatchRequestId} was not found in azure data response: {@Response}", "1", responses);
+    throw new Error("UserData with BatchRequestId '1' was not found in azure data response");
+  }
 
-  const graphUserGroups = responses.find((res: any) => res.id === "2").body;
-  const graphUserGroupsDisplayName = graphUserGroups?.value?.map((group: any) => group.displayName).sort() || [];
-  const graphSDSGroups = (graphUserGroups?.value && Array.isArray(graphUserGroups.value) && graphUserGroups.value.filter((group: any) => group.mailNickname?.startsWith("Section_"))) || [];
-  const graphSDSGroupsCurrentYearDisplayName = graphSDSGroups
-    .filter((group: any) => group.mailNickname.includes(currentSchoolYear))
-    .map((group: any) => group.displayName)
+  const graphUserGroups: Groups | undefined = responses.find((res: BatchRequestResponseType) => res.id === "2")?.body as Groups;
+  const graphUserGroupsDisplayNames: (string | null | undefined)[] = graphUserGroups?.value?.map((group: GraphTypes.Group) => group.displayName).sort() || [];
+  const graphSDSGroups: GraphTypes.Group[] =
+    (graphUserGroups?.value && Array.isArray(graphUserGroups.value) && graphUserGroups.value.filter((group: GraphTypes.Group) => group.mailNickname?.startsWith("Section_"))) || [];
+  const graphSDSGroupsCurrentYearDisplayName: (string | null | undefined)[] = graphSDSGroups
+    .filter((group: GraphTypes.Group) => group.mailNickname?.includes(currentSchoolYear))
+    .map((group: GraphTypes.Group) => group.displayName)
     .sort();
-  const graphSDSGroupsPreviousYearDisplayName = graphSDSGroups
-    .filter((group: any) => group.mailNickname.includes(previousSchoolYear))
-    .map((group: any) => group.displayName)
+  const graphSDSGroupsPreviousYearDisplayName: (string | null | undefined)[] = graphSDSGroups
+    .filter((group: GraphTypes.Group) => group.mailNickname?.includes(previousSchoolYear))
+    .map((group: GraphTypes.Group) => group.displayName)
     .sort();
 
-  const graphUserAuth = responses.find((res: any) => res.id === "3").body;
-  const graphUserAuthMethods = graphUserAuth?.value?.length && graphUserAuth.value.filter((method: any) => !method["@odata.type"].includes("passwordAuthenticationMethod"));
+  const graphUserAuth: AzureDataWrapper<AzureUserAuthenticationMethodSystemDataObject[]> | undefined = responses.find((res: BatchRequestResponseType) => res.id === "3")?.body as AzureDataWrapper<
+    AzureUserAuthenticationMethodSystemDataObject[]
+  >;
+  const graphUserAuthMethods: AzureUserAuthenticationMethodSystemDataObject[] =
+    (graphUserAuth?.value?.length && graphUserAuth.value.filter((method: AzureUserAuthenticationMethodSystemDataObject) => !method["@odata.type"].includes("passwordAuthenticationMethod"))) || [];
 
-  const userSignInSuccess = responses.find((res: any) => res.id === "4").body;
+  const userSignInSuccess: AzureDataWrapper<AzureUserSignInSystemDataObject[]> | undefined = responses.find((res: BatchRequestResponseType) => res.id === "4")?.body as AzureDataWrapper<
+    AzureUserSignInSystemDataObject[]
+  >;
 
-  const userSignInErrors = responses.find((res: any) => res.id === "5").body;
-  const filteredSignInErrors = userSignInErrors.value?.filter((signIn: any) => !excludeSignInErrors.includes(signIn.status.errorCode));
+  const userSignInErrors: AzureDataWrapper<AzureUserSignInSystemDataObject[]> | undefined = responses.find((res: BatchRequestResponseType) => res.id === "5")?.body as AzureDataWrapper<
+    AzureUserSignInSystemDataObject[]
+  >;
+  const filteredSignInErrors: AzureUserSignInSystemDataObject[] =
+    userSignInErrors?.value?.filter((signIn: AzureUserSignInSystemDataObject) => !excludeSignInErrors.includes(signIn.status.errorCode)) || [];
 
-  const graphRiskyUser = responses.find((res: any) => res.id === "6").body;
+  const graphRiskyUser: AzureDataWrapper<AzureRiskyUserSystemDataObject[]> | undefined = responses.find((res: BatchRequestResponseType) => res.id === "6")?.body as AzureDataWrapper<
+    AzureRiskyUserSystemDataObject[]
+  >;
 
-  const userDevices = responses.find((res: any) => res.id === "7").body;
-  const mappedUserDevices = userDevices.value?.map((device: any) => {
-    device.alternativeSecurityIds = undefined;
-    return device;
-  });
+  const userDevices: AzureDataWrapper<AzureUserDeviceSystemDataObject[]> | undefined = responses.find((res: BatchRequestResponseType) => res.id === "7")?.body as AzureDataWrapper<
+    AzureUserDeviceSystemDataObject[]
+  >;
+  const mappedUserDevices: AzureUserDeviceSystemDataObject[] =
+    userDevices?.value?.map((device: AzureUserDeviceSystemDataObject) => {
+      device.alternativeSecurityIds = undefined;
+      return device;
+    }) || [];
 
   return {
     ...userData,
@@ -176,11 +212,11 @@ export const getData = async (user: { userPrincipalName: string }): Promise<any>
       currentYear: graphSDSGroupsCurrentYearDisplayName,
       previousYear: graphSDSGroupsPreviousYearDisplayName
     },
-    memberOf: graphUserGroupsDisplayName,
+    memberOf: graphUserGroupsDisplayNames,
     authenticationMethods: graphUserAuthMethods,
     userSignInErrors: filteredSignInErrors,
-    userSignInSuccess: userSignInSuccess.value,
-    graphRiskyUser: graphRiskyUser.value,
+    userSignInSuccess: userSignInSuccess?.value ?? [],
+    graphRiskyUser: graphRiskyUser?.value ?? [],
     userDevices: mappedUserDevices
   };
 };

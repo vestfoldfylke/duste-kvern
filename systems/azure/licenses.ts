@@ -1,8 +1,4 @@
-type License = {
-  skuId: string;
-  skuPartNumber: string;
-  name: string;
-};
+import type { License } from "../../types/azure.js";
 
 const licenses: License[] = [
   {
