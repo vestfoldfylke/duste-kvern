@@ -4,7 +4,7 @@ import { logger } from "@vestfoldfylke/loglady";
 import type { Collection, Db, MongoClient, WithId } from "mongodb";
 import { GET_NEW_REPORTS_INTERVAL, MONGODB } from "./config.js";
 import { getMongoClient } from "./lib/mongo-client.js";
-import type { Report } from "./types/system-tests.js";
+import type { Report, ReportWithId } from "./types/system-tests.js";
 
 const workerFile: string = fileURLToPath(new URL("./lib/dust-report-worker.js", import.meta.url));
 
@@ -39,9 +39,10 @@ const getAndRunNewReports = async (): Promise<number | null> => {
     }
 
     newReports.forEach((report: WithId<Report>) => {
-      const merged: WithId<Report> = {
+      const merged: ReportWithId = {
         ...report,
-        ...updateProps
+        ...updateProps,
+        _id: report._id.toHexString()
       };
 
       const worker = new Worker(workerFile, { workerData: merged });
