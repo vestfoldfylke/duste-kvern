@@ -1,5 +1,5 @@
 import { logger } from "@vestfoldfylke/loglady";
-import { type Collection, type MongoClient, ObjectId, type WithId } from "mongodb";
+import type { Collection, MongoClient, WithId } from "mongodb";
 import { MONGODB } from "../config.js";
 import type { AllSystemData } from "../types/system-data.js";
 import type { Report, SystemWithTestsResult } from "../types/system-tests.js";
