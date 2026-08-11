@@ -98,7 +98,7 @@ const handleWaitingTestsInWorker = async (system: SystemTests, correspondingSyst
 const report: WithId<Report> = workerData;
 
 const logContext = {
-  prefix: `dust-report-worker - Thread Id: ${threadId} - Report Id: ${report._id} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
+  prefix: `dust-report-worker - Thread Id: ${threadId} - Report Id: ${report._id.toString()} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
 };
 
 await runInContext(logContext, async () => {
