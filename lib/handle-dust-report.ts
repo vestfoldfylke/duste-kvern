@@ -1,5 +1,5 @@
 import { logger } from "@vestfoldfylke/loglady";
-import { type Collection, type MongoClient, ObjectId, type WithId } from "mongodb";
+import type { Collection, MongoClient, WithId } from "mongodb";
 import { MONGODB } from "../config.js";
 import type { AllSystemData } from "../types/system-data.js";
 import type { Report, SystemWithTestsResult } from "../types/system-tests.js";
@@ -11,7 +11,7 @@ import { setupUserTests } from "./setup-user-tests.js";
 
 export const handleDustReport = async (report: WithId<Report>): Promise<void> => {
   const logContext = {
-    prefix: `handle-dust-report - Report Id: ${report._id} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
+    prefix: `handle-dust-report - Report Id: ${report._id.toString()} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
   };
 
   await runInContext(logContext, async () => {
@@ -29,7 +29,7 @@ export const handleDustReport = async (report: WithId<Report>): Promise<void> =>
     logger.info("Setting up systems and tests");
     const { systemsOverview, systemsToHandle } = await setupUserTests(report.user.userType);
 
-    collection.updateOne({ _id: new ObjectId(report._id) }, { $set: { systems: systemsOverview } });
+    collection.updateOne({ _id: report._id }, { $set: { systems: systemsOverview } });
     logger.info("Successfully set up systems and tests");
 
     const systemAndTestsPromises: Promise<SystemInWorkerResponse>[] = [];
@@ -70,7 +70,7 @@ export const handleDustReport = async (report: WithId<Report>): Promise<void> =>
 
     const serverRuntime: number = finishedTimestamp.getTime() - new Date(report.startedTimestamp).getTime();
     const totalRuntime: number = finishedTimestamp.getTime() - new Date(report.createdTimestamp).getTime();
-    await collection.updateOne({ _id: new ObjectId(report._id) }, { $set: { finishedTimestamp: finishedTimestamp.toISOString(), serverRuntime, totalRuntime, systems: systemsOverview } });
+    await collection.updateOne({ _id: report._id }, { $set: { finishedTimestamp: finishedTimestamp.toISOString(), serverRuntime, totalRuntime, systems: systemsOverview } });
 
     logger.info("Dust report finished");
     return "Finished";

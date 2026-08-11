@@ -13,7 +13,7 @@ import systemNames from "../system-names.js";
   waitForAllData: false,
   test: (_user: TestUser, systemData: SystemData | undefined) => {
   if (!systemData) {
-      return warn({message: `Mangler data i ${systemNames.sync}`, solution: `Meld sak en plass`});
+      return warn({message: `Mangler data i ${systemNames.sync}`, solution: "Meld sak til arbeidsgruppe IDM i Pureservice"});
     }
 
     const syncData: SyncSystemData = getSystemData<SyncSystemData>(systemData);
@@ -42,7 +42,7 @@ export const syncAzure: TestCase = {
   waitForAllData: false,
   test: (_user: TestUser, systemData: SystemData | undefined) => {
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.sync}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.sync}`, solution: "Meld sak til arbeidsgruppe IDM i Pureservice" });
     }
 
     const syncData: SyncSystemData = getSystemData<SyncSystemData>(systemData);

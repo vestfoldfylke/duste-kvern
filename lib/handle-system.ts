@@ -1,5 +1,5 @@
 import { logger } from "@vestfoldfylke/loglady";
-import { type Collection, ObjectId, type WithId } from "mongodb";
+import type { Collection, WithId } from "mongodb";
 import type { AllSystemData, SystemData } from "../types/system-data.js";
 import type { Report, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
 import type { GetData, SystemInWorkerResponse } from "../types/worker.js";
@@ -73,7 +73,7 @@ export const handleSystem = async (
 
   logger.info("handle-system - Finished running get-data-function and instant tests for system {SystemId}, saving to db", system.id);
   try {
-    mongoCollection.updateOne({ _id: new ObjectId(report._id), "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
+    mongoCollection.updateOne({ _id: report._id, "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
   } catch (err) {
     logger.errorException(err, "handle-system - Failed when updating corresponding system in overview for system {SystemId}", system.id);
   }

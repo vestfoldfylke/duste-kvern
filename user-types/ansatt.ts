@@ -26,7 +26,7 @@ export const systemsAndTests: SystemWithTestsAndData[] = [
         waitForAllData: false,
         test: (_user: TestUser, systemData: SystemData | undefined) => {
           if (!systemData) {
-            return warn({ message: `Mangler data i ${systemNames.azure}`, solution: `Rettes i ${systemNames.vis}` });
+            return warn({ message: `Mangler data i ${systemNames.ad}`, solution: `Rettes i ${systemNames.vis}` });
           }
 
           const adData: ADSystemData = getSystemData<ADSystemData>(systemData);
