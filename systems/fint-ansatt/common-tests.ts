@@ -75,7 +75,7 @@ export const fintAnsattKategori: TestCase = {
       return error({
         message: `Kategorien på personalressursen (${category.kode}) er ekskludert, som tilsier at det ikke skal opprettes noen brukerkonto`,
         raw: category,
-        solution: "Meld sak til arbeidsgruppe IDM i Pureservice"
+        solution: "Rettes i HR"
       });
     }
 
