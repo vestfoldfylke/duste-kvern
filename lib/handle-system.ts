@@ -62,11 +62,7 @@ export const handleSystem = async (
 
   correspondingSystemInOverview.finishedTimestamp = new Date().toISOString();
   if (!correspondingSystemInOverview.startedTimestamp) {
-    logger.warn(
-      "startedTimestamp is not set on correspondingSystemInOverview for system {System} in ReportId {ReportId}. Setting it to the same as finishedTimestamp",
-      system.id,
-      report._id
-    );
+    logger.warn("startedTimestamp is not set on correspondingSystemInOverview for system {System} in ReportId {ReportId}. Setting it to the same as finishedTimestamp", system.id, report._id);
     correspondingSystemInOverview.startedTimestamp = correspondingSystemInOverview.finishedTimestamp;
   }
   correspondingSystemInOverview.runtime = new Date(correspondingSystemInOverview.finishedTimestamp).getTime() - new Date(correspondingSystemInOverview.startedTimestamp).getTime();
