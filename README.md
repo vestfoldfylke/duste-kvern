@@ -9,7 +9,6 @@ Henter jobber fra db, kverner data, og oppdaterer i db
 - Powershell
 - Nettverksåpning mot mongodb-cluster
 - Nettverksåpning mot BAS-server (når kjørte IDM-et siste-filer)
-- Nettverksåpning mot equitrac
 - Nettverksåpning mot FEIDE-server (ad)
 ### Tilganger for servicebruker som trengs
 - Lese filer på nettverksshare (hvis noen filer ligger der)
@@ -22,7 +21,7 @@ Sorteres på ulike brukertyper (ansattVFYLKE, ansattVTFK, elev osv...)
 
 ## duste-kverna
 
-`index.js` and `indexThreader` needs to be started with `--env-file` argument like this: `node --env-file=.env index.js` (or `indexThreader.js`)
+`index.js` and `indexThreader` needs to be started with `--env-file` argument like this: `node --env-file=.env ./dist/index.js` (or `./dist/indexThreader.js`)
 
 ### index.js
 - Henter nye rapporter fra mongodb

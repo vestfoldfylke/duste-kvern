@@ -29,11 +29,6 @@ $idm = @{
   autoRun = "<unc-path-autorun-folder-for-post-scripts-from-idm>"
   file = "lastRun.txt"
 }
-
-$equitrac = @{
-    path   = "<path-to-EQCmd.exe>" # local path or unc path
-    server = "<hostname-to-Equitrac-server>" # do not use FQDN as EQCmd.exe doesn't handle this!
-}
 ```
 
 ## Database
