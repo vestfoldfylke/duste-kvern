@@ -49,9 +49,10 @@ export const getDusteUsers = async (): Promise<TestUser[]> => {
       isTeacher,
       feidenavn: isTeacher && employee.onPremisesSamAccountName ? `${employee.onPremisesSamAccountName}@${TENANT_NAME}.no` : null,
       samAccountName: employee.onPremisesSamAccountName,
-      employeeNumber: employeeNumberValue,
-      [EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE]: undefined
+      employeeNumber: employeeNumberValue
     } as TestUser;
+
+    delete (user as Record<string, unknown>)[EMPLOYEE_NUMBER_EXTENSION_ATTRIBUTE];
 
     allUsers.push(user);
   }
