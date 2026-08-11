@@ -34,7 +34,7 @@ export const nettsperreHarNettsperre: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: "Spør en voksen i vaktrommet" });
     }
 
     const nettsperreData: NettsperreSystemData = getSystemData<NettsperreSystemData>(systemData);
@@ -94,7 +94,7 @@ export const nettsperrePending: TestCase = {
   waitForAllData: false,
   test: (_user: TestUser, systemData: SystemData | undefined) => {
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: "Spør en voksen i vaktrommet" });
     }
 
     const nettsperreData: NettsperreSystemData = getSystemData<NettsperreSystemData>(systemData);
@@ -120,7 +120,7 @@ export const nettsperreOverlappende: TestCase = {
   waitForAllData: false,
   test: (_user: TestUser, systemData: SystemData | undefined) => {
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.nettsperre}`, solution: "Spør en voksen i vaktrommet" });
     }
 
     const nettsperreData: NettsperreSystemData = getSystemData<NettsperreSystemData>(systemData);

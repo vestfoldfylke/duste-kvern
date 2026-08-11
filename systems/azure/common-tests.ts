@@ -430,7 +430,7 @@ export const azureAdInSync: TestCase = {
   waitForAllData: true,
   test: (user: TestUser, systemData: SystemData | undefined, allData: AllSystemData) => {
     if (!allData.ad) {
-      return error({ message: `Mangler data i ${systemNames.ad}`, raw: { user } });
+      return error({ message: `Mangler data i ${systemNames.ad}`, raw: { user }, solution: "Rettes i HR" });
     }
 
     if (isFailedSystemData(allData.ad)) {

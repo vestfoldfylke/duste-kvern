@@ -35,7 +35,7 @@ export const fintKontaktlarer: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -70,7 +70,7 @@ export const fintDuplicateKontaktlarergrupper: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -119,7 +119,7 @@ export const fintSkoleforhold: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -149,7 +149,7 @@ export const fintUndervisningsgrupper: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -192,7 +192,7 @@ export const fintFodselsnummer: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -233,7 +233,7 @@ export const fintMobilnummer: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
@@ -277,7 +277,7 @@ export const fintFeideVis: TestCase = {
     }
 
     if (!systemData) {
-      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Meld sak en plass` });
+      return warn({ message: `Mangler data i ${systemNames.fintLarer}`, solution: `Rettes i ${systemNames.vis}` });
     }
 
     const fintData: FintLarerSystemData = getSystemData<FintLarerSystemData>(systemData);
