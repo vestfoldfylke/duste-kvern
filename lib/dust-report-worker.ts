@@ -1,9 +1,9 @@
 import { parentPort, threadId, workerData } from "node:worker_threads";
 import { logger } from "@vestfoldfylke/loglady";
-import type { Collection, MongoClient, WithId } from "mongodb";
+import { type Collection, type MongoClient, ObjectId } from "mongodb";
 import { MONGODB } from "../config.js";
 import type { AllSystemData, SystemData } from "../types/system-data.js";
-import type { Report, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
+import type { Report, ReportWithId, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
 import type { GetData, SystemInWorkerResponse } from "../types/worker.js";
 import { runInContext } from "./async-local-context.js";
 import { CustomError } from "./CustomError.js";
@@ -16,7 +16,7 @@ parentPort?.postMessage("I started");
 const handleSystemInWorker = async (
   system: SystemTests,
   correspondingSystemInOverview: SystemWithTestsResult,
-  report: WithId<Report>,
+  report: ReportWithId,
   mongoCollection: Collection<Report>
 ): Promise<SystemInWorkerResponse> => {
   let getDataFunction: GetData;
@@ -72,19 +72,19 @@ const handleSystemInWorker = async (
     logger.warn(
       "startedTimestamp is not set on correspondingSystemInOverview for system {System} in ReportId {ReportId}. Setting it to the same as finishedTimestamp",
       system.id,
-      report._id.toString()
+      report._id
     );
     correspondingSystemInOverview.startedTimestamp = correspondingSystemInOverview.finishedTimestamp;
   }
   correspondingSystemInOverview.runtime = new Date(correspondingSystemInOverview.finishedTimestamp).getTime() - new Date(correspondingSystemInOverview.startedTimestamp).getTime();
 
   logger.info("Finished running get-data-function and instant tests for system {SystemId}, saving to db", system.id);
-  mongoCollection.updateOne({ _id: report._id, "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
+  mongoCollection.updateOne({ _id: new ObjectId(report._id), "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
 
   return { [system.id]: systemData };
 };
 
-const handleWaitingTestsInWorker = async (system: SystemTests, correspondingSystemInOverview: SystemWithTestsResult, report: WithId<Report>, allData: AllSystemData): Promise<void> => {
+const handleWaitingTestsInWorker = async (system: SystemTests, correspondingSystemInOverview: SystemWithTestsResult, report: ReportWithId, allData: AllSystemData): Promise<void> => {
   const testsToRun: TestCase[] = system.tests.filter((test: TestCase) => test.waitForAllData);
 
   for (const test of testsToRun) {
@@ -95,10 +95,10 @@ const handleWaitingTestsInWorker = async (system: SystemTests, correspondingSyst
   logger.info("Finished running waiting tests for system {SystemId}", system.id);
 };
 
-const report: WithId<Report> = workerData;
+const report: ReportWithId = workerData;
 
 const logContext = {
-  prefix: `dust-report-worker - Thread Id: ${threadId} - Report Id: ${report._id.toString()} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
+  prefix: `dust-report-worker - Thread Id: ${threadId} - Report Id: ${report._id} - Caller: ${report.caller.upn} - User: ${report.user.userPrincipalName}`
 };
 
 await runInContext(logContext, async () => {
@@ -116,7 +116,7 @@ await runInContext(logContext, async () => {
   logger.info("Setting up systems and tests");
   const { systemsOverview, systemsToHandle } = await setupUserTests(report.user.userType);
 
-  collection.updateOne({ _id: report._id }, { $set: { systems: systemsOverview } });
+  collection.updateOne({ _id: new ObjectId(report._id) }, { $set: { systems: systemsOverview } });
   logger.info("Successfully set up systems and tests");
 
   const systemAndTestsPromises: Promise<SystemInWorkerResponse>[] = [];
@@ -151,13 +151,13 @@ await runInContext(logContext, async () => {
   const finishedTimestamp: Date = new Date();
 
   if (!report.startedTimestamp) {
-    logger.warn("startedTimestamp is not set on ReportId {ReportId}. Setting it to the same as finishedTimestamp", report._id.toString());
+    logger.warn("startedTimestamp is not set on ReportId {ReportId}. Setting it to the same as finishedTimestamp", report._id);
     report.startedTimestamp = finishedTimestamp.toISOString();
   }
 
   const serverRuntime: number = finishedTimestamp.getTime() - new Date(report.startedTimestamp).getTime();
   const totalRuntime: number = finishedTimestamp.getTime() - new Date(report.createdTimestamp).getTime();
-  await collection.updateOne({ _id: report._id }, { $set: { finishedTimestamp: finishedTimestamp.toISOString(), serverRuntime, totalRuntime, systems: systemsOverview } });
+  await collection.updateOne({ _id: new ObjectId(report._id) }, { $set: { finishedTimestamp: finishedTimestamp.toISOString(), serverRuntime, totalRuntime, systems: systemsOverview } });
 
   await closeMongoClient();
   logger.info("Finished report");

@@ -1,7 +1,7 @@
 import { logger } from "@vestfoldfylke/loglady";
-import type { Collection, WithId } from "mongodb";
+import { type Collection, ObjectId } from "mongodb";
 import type { AllSystemData, SystemData } from "../types/system-data.js";
-import type { Report, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
+import type { Report, ReportWithId, SystemTests, SystemWithTestsResult, TestCase } from "../types/system-tests.js";
 import type { GetData, SystemInWorkerResponse } from "../types/worker.js";
 import { CustomError } from "./CustomError.js";
 import { HTTPError } from "./helpers/HTTPError.js";
@@ -9,7 +9,7 @@ import { HTTPError } from "./helpers/HTTPError.js";
 export const handleSystem = async (
   system: SystemTests,
   correspondingSystemInOverview: SystemWithTestsResult,
-  report: WithId<Report>,
+  report: ReportWithId,
   mongoCollection: Collection<Report>
 ): Promise<SystemInWorkerResponse> => {
   let getDataFunction: GetData;
@@ -65,7 +65,7 @@ export const handleSystem = async (
     logger.warn(
       "startedTimestamp is not set on correspondingSystemInOverview for system {System} in ReportId {ReportId}. Setting it to the same as finishedTimestamp",
       system.id,
-      report._id.toString()
+      report._id
     );
     correspondingSystemInOverview.startedTimestamp = correspondingSystemInOverview.finishedTimestamp;
   }
@@ -73,7 +73,7 @@ export const handleSystem = async (
 
   logger.info("handle-system - Finished running get-data-function and instant tests for system {SystemId}, saving to db", system.id);
   try {
-    mongoCollection.updateOne({ _id: report._id, "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
+    mongoCollection.updateOne({ _id: new ObjectId(report._id), "systems.id": system.id }, { $set: { "systems.$": correspondingSystemInOverview } });
   } catch (err) {
     logger.errorException(err, "handle-system - Failed when updating corresponding system in overview for system {SystemId}", system.id);
   }
@@ -81,7 +81,7 @@ export const handleSystem = async (
   return { [system.id]: systemData };
 };
 
-export const handleWaitingTests = async (system: SystemTests, correspondingSystemInOverview: SystemWithTestsResult, report: WithId<Report>, allData: AllSystemData): Promise<void> => {
+export const handleWaitingTests = async (system: SystemTests, correspondingSystemInOverview: SystemWithTestsResult, report: ReportWithId, allData: AllSystemData): Promise<void> => {
   const testsToRun: TestCase[] = system.tests.filter((test: TestCase) => test.waitForAllData);
 
   for (const test of testsToRun) {

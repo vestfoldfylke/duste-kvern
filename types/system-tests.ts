@@ -19,6 +19,10 @@ export type Report = {
   systems: SystemWithTestsResult[];
 };
 
+export type ReportWithId = Report & {
+  _id: string;
+};
+
 export type SystemWithTestsAndData = {
   id: "ad" | "azure" | "fint-ansatt" | "fint-elev" | "fint-larer" | "info" | "nettsperre" | "sync" | "feide";
   name: string;
