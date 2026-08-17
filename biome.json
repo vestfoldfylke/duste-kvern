@@ -21,6 +21,14 @@
       "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "warn"
+      },
+      "correctness": {
+        "useImportExtensions": {
+          "options": {
+            "forceJsExtensions": true
+          },
+          "level": "error"
+        }
       }
     },
     "includes": ["**", "!node_modules", "!dist", "!!package.json"]
